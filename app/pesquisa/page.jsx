@@ -5,7 +5,6 @@ import { MdSearch } from "react-icons/md";
 
 export default function PesquisaPage() {
   return (
-    // 1. Removi o 'gap-12' daqui para controlar o espaçamento manualmente
     <div className="flex flex-col items-center justify-center h-full w-full">
 
       {/* --- LOGO --- */}
@@ -23,7 +22,6 @@ export default function PesquisaPage() {
       </Link>
 
       {/* --- BARRA DE PESQUISA --- */}
-      {/* 3. Mudei de 'max-w-2xl' para 'max-w-5xl' para ficar bem mais longa */}
       <div className="w-full max-w-5xl px-4">
         <div className="relative flex items-center group">
           <input

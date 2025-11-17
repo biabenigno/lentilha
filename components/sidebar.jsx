@@ -3,16 +3,12 @@
 import React from 'react';
 import { MdSearch, MdHome, MdPerson } from "react-icons/md";
 import Link from 'next/link';
-// Para pegar a rota atual e ativar o botão
-import { usePathname } from 'next/navigation'; // Importante para Next.js
+import { usePathname } from 'next/navigation';
 
-const SidebarItem = ({ icon: Icon, label, href, isProfile }) => { // Adicionei 'href'
+const SidebarItem = ({ icon: Icon, label, href, isProfile }) => {
   const pathname = usePathname(); // Pega a rota atual
   const isActive = href === pathname; // Compara a rota do item com a rota atual
 
-  // Definição das classes de estilo base para os botões.
-  // Note a largura 'w-16' e a altura 'h-10' para o formato achatado,
-  // e 'rounded-full' para o arredondamento total nas laterais.
   const buttonBaseClasses = `
     flex items-center justify-center 
     transition-all duration-200 ease-in-out
@@ -28,7 +24,6 @@ const SidebarItem = ({ icon: Icon, label, href, isProfile }) => { // Adicionei '
   `;
 
   return (
-    // Removido o mb-8 para controle mais fino do espaçamento
     <div className="flex flex-col items-center gap-1 cursor-pointer group">
       {/* Botão para Ícone de Perfil */}
       {isProfile ? (
@@ -55,15 +50,15 @@ const SidebarItem = ({ icon: Icon, label, href, isProfile }) => { // Adicionei '
 export default function Sidebar() {
   return (
     <aside className="w-24 flex flex-col items-center pt-8 pb-6 border-r border-gray-100 bg-white fixed h-full z-10 left-0 top-0">
-      
+
       {/* Espaçamento entre o topo e o primeiro item */}
       <div className="mt-4 mb-8"> {/* Ajustei o espaçamento aqui para controlar melhor */}
         <SidebarItem icon={MdPerson} isProfile={true} />
       </div>
 
-      <nav className="flex flex-col items-center gap-6"> 
+      <nav className="flex flex-col items-center gap-6">
         <SidebarItem icon={MdSearch} label="Pesquisar" href="/pesquisa" />
-        <SidebarItem icon={MdHome} label="Conhecer" href="/" /> 
+        <SidebarItem icon={MdHome} label="Conhecer" href="/" />
       </nav>
     </aside>
   );
