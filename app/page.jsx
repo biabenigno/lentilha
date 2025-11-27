@@ -1,105 +1,113 @@
+"use client";
+
 import Image from "next/image";
+import Link from "next/link";
+import { MdOutlineScience, MdPublic, MdLayers, MdArrowForward } from "react-icons/md";
+// 💡 Supondo que você tenha um Button component acessível
+import { Button } from "../components/ui/button";
+
+const BRAND = {
+  primary: "#448040", // Verde Lentilha
+  primaryDark: "#146151",
+  accent: "#B4CF66",
+  mutedText: "#6b6b6b",
+  lightPurple: "#f3eef6"
+};
+
+const FeatureCard = ({ icon: Icon, title, description }) => (
+  // Card com border-left grosso para destacar o conteúdo
+  <div className="flex flex-col gap-2 p-5 bg-white rounded-lg shadow-md border-l-4 border-[#FFAE3C] hover:shadow-xl transition-shadow duration-300">
+    <Icon size={32} className="text-purple-700" />
+    <h3 className="text-lg font-bold" style={{ color: BRAND.primaryDark }}>{title}</h3>
+    <p className="text-sm text-gray-700">{description}</p>
+  </div>
+);
 
 export default function Home() {
   return (
-    <div className="flex flex-col items-center justify-center h-full font-sans">
-      
-      <main className="flex flex-col gap-8 items-center text-center">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-mono">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    // Garantindo que a tela tenha altura 100vh e sem scroll
+    <div className="flex flex-col items-center pt-12 lg:pt-20 font-sans bg-[#f3eef6] pb-10">
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm h-10 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+      <main className="flex flex-col gap-16 items-center text-center max-w-5xl px-4 flex-grow">
+
+        {/* 1. SEÇÃO DE HERO: LOGO E MISSÃO PRINCIPAL */}
+        <div className="flex flex-col items-center gap-6 mt-16">
+          <div className="relative w-96 h-24">
+            {/* Imagem do logo Lentilha */}
+            <Image
+              src="/logo-lentilha.png"
+              alt="Logo Lentilha"
+              fill
+              className="object-contain"
+              priority
+            />
+          </div>
+          {/* --- LOGO-- - */}
+          <Link
+            href="/"
+            className="relative w-[550px] h-[128px] cursor-pointer"
           >
             <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+              src="/logo-lentilha.png"
+              alt="Logo Lentilha"
+              fill
+              className="object-contain"
+              priority
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm h-10 px-4 sm:px-5"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+          </Link>
+          <h1 className="text-4xl font-extrabold text-gray-800 max-w-3xl" style={{ color: BRAND.primaryDark }}>
+            A solução para quantificar o verdadeiro impacto ambiental da sua alimentação!
+          </h1>
+
+          <p className="text-xl font-light text-gray-600 max-w-2xl">
+            Transformamos a complexidade da Avaliação do Ciclo de Vida (ACV) em informações simples e acionáveis para o consumidor brasileiro.
+          </p>
+        </div>
+
+        {/* 2. PILARES TÉCNICOS (3 COLUNAS) */}
+        <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-8 mt-6">
+
+          <FeatureCard
+            icon={MdOutlineScience}
+            title="Rigor Metodológico"
+            description="Baseado na metodologia científica  ACV (ISO 14040/14044) para medir o impacto 'do berço ao túmulo'."
+          />
+          <FeatureCard
+            icon={MdLayers}
+            title="Análise 3D: Multidimensional"
+            description="Não olhamos apenas o CO₂e, mas sim o impacto completo:  Pegada de Carbono,  Pegada Hídrica (WF)  e  Uso da Terra (EF) ."
+          />
+          <FeatureCard
+            icon={MdPublic}
+            title="Contexto Regionalizado"
+            description="Nossos cálculos utilizam dados do consumo alimentar da  POF/IBGE, superando a lacuna de dados não adaptados ao Brasil."
+          />
+        </div>
+
+        {/* 3. CHAMADA À AÇÃO E ESTATÍSTICA CHAVE */}
+        <div className="w-full mt-4 flex flex-col items-center gap-6 p-6 rounded-xl border-2 border-[#FFAE3C] bg-white shadow-xl">
+          <p className="text-lg font-semibold text-gray-700">
+            O Brasil tem uma emissão de carbono por refeição diária muito maior que a meta global.
+            <br />
+            Comece a comparar e reduzir seu impacto agora!
+          </p>
+
+          <Link href="/pesquisa">
+            <Button
+              className="h-12 px-8 text-lg font-bold flex items-center gap-2 transition-colors duration-300 hover:bg-[#60B46A]" // Hover mais claro
+              style={{ backgroundColor: BRAND.primary, color: 'white' }}
+              variant="default" // Usando a variante padrão para o botão principal
+            >
+              <MdArrowForward size={24} />
+              Pesquisar o impacto da minha dieta
+            </Button>
+          </Link>
         </div>
       </main>
 
-      <footer className="mt-16 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+      {/* Rodapé - Texto colado com o conteúdo acima */}
+      <footer className=" text-sm text-gray-500 mt-8 mb-4">
+        &copy; 2025 LENTILHA. Trabalho de Conclusão de Curso (TCC), UNIFOR.
       </footer>
     </div>
   );

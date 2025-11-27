@@ -19,15 +19,12 @@ import {
   LineChart,
   Line,
 } from "recharts";
+// ⬅️ Importação do novo componente de barra lateral secundária
+import SecondarySidebar from "../../components/secondarySidebar";
+
 
 /**
  * Página /resumo — com filtro dropdown (Dia / Semana / Mês / Ano)
- * - O dropdown fica à direita do título "Resumo" (dentro do card)
- * - Alterar o período multiplica os dados conforme:
- *    Dia -> x1, Semana -> x7, Mês -> x30, Ano -> x365
- *
- * Observação: precisa do `recharts` instalado:
- *   npm i recharts
  */
 
 const BRAND = {
@@ -46,6 +43,8 @@ const PERIODS = {
   Ano: 365,
 };
 
+// ⬅️ Removendo a função SectionButton daqui
+
 export default function Page() {
   // seleção de período
   const [period, setPeriod] = useState("Dia");
@@ -58,39 +57,40 @@ export default function Page() {
   // base (diária) — valores numéricos para escalar
   const base = useMemo(
     () => ({
+      // DADOS CONSOLIDADOS DA REFEIÇÃO DO DIA
       totals: {
-        co2e: 15.7, // kg
-        water: 12218.7, // litros
-        land: 63.2, // m²
+        co2e: 14.76, // kg
+        water: 9959.3, // litros
+        land: 62.7, // m²
       },
-      // dados "por categoria" (CO2) — base diária
+      // CO2 Categories: Ajustado para refletir a dominância da proteína bovina no seu dia (12.7kg)
       co2Categories: [
-        { name: "Proteína", Média: 1500, Você: 4800 },
-        { name: "Laticínios", Média: 900, Você: 1200 },
-        { name: "Cereais", Média: 600, Você: 800 },
+        { name: "Proteína Bovina", Média: 4000, Você: 12726 },
+        { name: "Laticínios", Média: 2500, Você: 1200 },
+        { name: "Cereais/Vegetais", Média: 1000, Você: 831 },
       ],
-      // série temporal de água (últimos 7 dias) - usamos a mesma estrutura, mas multiplicamos
+      // Water Series com flutuação mais extrema
       waterSeries: [
-        { day: "Seg", litros: 1200 },
-        { day: "Ter", litros: 1800 },
-        { day: "Qua", litros: 900 },
-        { day: "Qui", litros: 2100 },
-        { day: "Sex", litros: 1400 },
-        { day: "Sáb", litros: 2600 },
-        { day: "Dom", litros: 2400 },
+        { day: "Seg", litros: 6500 },
+        { day: "Ter", litros: 9959 }, // Dia da medição atual
+        { day: "Qua", litros: 5500 },
+        { day: "Qui", litros: 15000 }, // Pico extremo simulado
+        { day: "Sex", litros: 8000 },
+        { day: "Sáb", litros: 11500 },
+        { day: "Dom", litros: 7800 },
       ],
-      // uso de terra por refeição (base)
+      // uso de terra por refeição (base em m²)
       landByMeal: [
-        { meal: "Café", m2: 12 },
-        { meal: "Almoço", m2: 28 },
-        { meal: "Lanche", m2: 6 },
-        { meal: "Jantar", m2: 17 },
+        { meal: "Café", m2: 4.9 },
+        { meal: "Almoço", m2: 41.9 },
+        { meal: "Lanche", m2: 4.5 },
+        { meal: "Jantar", m2: 11.4 },
       ],
       // métricas derivadas (carro km, horas banho, aptos) - base diária
       metrics: {
         carroKm: 82,
-        banhoHoras: 21,
-        areaApto: 1,
+        banhoHoras: 11.1,
+        areaApto: 1.0,
       },
     }),
     []
@@ -110,14 +110,16 @@ export default function Page() {
     // co2 categories scaled
     const co2Data = base.co2Categories.map((d) => ({
       name: d.name,
-      Média: Math.round(d.Média * multiplier),
-      Você: Math.round(d.Você * multiplier),
+      // Variação para a Média (longo prazo)
+      Média: Math.round(d.Média * (1 + Math.random() * 0.1) * multiplier),
+      // Variação para o Consumo (Você) (longo prazo)
+      Você: Math.round(d.Você * (1 + (Math.random() - 0.5) * 0.2) * multiplier),
     }));
 
-    // water series scaled (we'll scale each day by multiplier; for "Dia" this will just be base)
+    // water series scaled (Variação para longo prazo)
     const waterData = base.waterSeries.map((d) => ({
       day: d.day,
-      litros: Math.round(d.litros * multiplier),
+      litros: Math.round(d.litros * (multiplier > 1 ? (1 + (Math.random() - 0.5) * 0.2) : 1) * multiplier),
     }));
 
     // land scaled
@@ -126,10 +128,10 @@ export default function Page() {
       m2: Math.round(d.m2 * multiplier * 10) / 10, // keep one decimal
     }));
 
-    // metrics scaled (we'll show proportional values for illustration)
+    // metrics scaled 
     const metrics = {
       carroKm: Math.round(base.metrics.carroKm * multiplier),
-      banhoHoras: Math.round(base.metrics.banhoHoras * multiplier),
+      banhoHoras: Math.round(base.metrics.banhoHoras * multiplier * 10) / 10,
       areaApto: Math.round(base.metrics.areaApto * multiplier * 10) / 10,
     };
 
@@ -137,35 +139,19 @@ export default function Page() {
   }, [base, multiplier]);
 
   // helper formatting
-  const fmtKg = (v) => `${Number(v).toLocaleString("pt-BR")} kg CO₂e`;
-  const fmtLit = (v) => `${Number(v).toLocaleString("pt-BR")} litros`;
-  const fmtM2 = (v) => `${Number(v).toLocaleString("pt-BR")} m²`;
+  const fmtKg = (v) => `${Number(v).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} kg CO₂e`;
+  const fmtLit = (v) => `${Number(v).toLocaleString("pt-BR", { maximumFractionDigits: 0 })} litros`;
+  const fmtM2 = (v) => `${Number(v).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} m²`;
 
   return (
     <div className="min-h-full w-full font-sans bg-[#f3eef6] p-6">
       <div className="w-full flex flex-col lg:flex-row gap-6 items-start">
-        {/* Coluna lateral interna */}
-        <aside className="w-full lg:w-[240px] flex-shrink-0 flex flex-col items-start gap-6">
-          <div className="flex items-center gap-3">
-            <div className="w-20 h-20 rounded-full bg-white/80 flex items-center justify-center shadow">
-              <Image src="/avatar.png" alt="avatar" width={72} height={72} className="object-cover rounded-full" />
-            </div>
-            <div>
-              <p className="text-xs text-[#6b6b6b]">Seja bem-vinda,</p>
-              <p className="text-lg font-semibold" style={{ color: BRAND.primary }}>
-                Fernanda
-              </p>
-            </div>
-          </div>
 
-          <nav className="w-full space-y-3">
-            <SectionButton href="/perfil/editar" label="Editar perfil" />
-            <SectionButton href="/resumo" label="Resumo - meu impacto" active />
-            <SectionButton href="/refeicoes" label="Refeições" />
-            <SectionButton href="/configuracoes" label="Configurações" />
-            <SectionButton href="/sair" label="Sair" />
-          </nav>
-        </aside>
+        {/* ⬅️ NOVO COMPONENTE FIXO */}
+        <SecondarySidebar />
+
+        {/* ⬅️ ESPAÇADOR VAZIO (Reserva o espaço da sidebar fixa no flow da div pai) */}
+        <div className="hidden lg:block w-[240px] flex-shrink-0" aria-hidden="true" />
 
         {/* Main CARD */}
         <main className="flex-1 rounded-2xl bg-[#fff4f8] border border-[#f0e6ef] p-6 lg:p-10 shadow-lg min-h-[640px] w-full">
@@ -235,7 +221,7 @@ export default function Page() {
 
                   <MetricCard
                     icon={<MdLandscape size={20} />}
-                    title={`${scaled.metrics.areaApto} apt.`}   // <--- aqui fechei a chave
+                    title={`${scaled.metrics.areaApto} apt.`}
                     subtitle="Área equivalente (aptos)"
                     bg={BRAND.accent}
                   />
@@ -328,7 +314,7 @@ export default function Page() {
                     <div className="mt-3 text-sm text-[#4b6a54] min-h-[32px]">
                       {selectedWater ? (
                         <span>
-                          {selectedWater.day}: <strong>{selectedWater.litros.toLocaleString("pt-BR")} litros</strong>
+                          {selectedWater.day}: <strong>{Number(selectedWater.litros).toLocaleString("pt-BR")} litros</strong>
                         </span>
                       ) : (
                         <span>Clique em um ponto do gráfico para selecionar</span>
@@ -342,7 +328,7 @@ export default function Page() {
                       <strong className="text-sm" style={{ color: BRAND.primary }}>
                         Uso de terra por refeição
                       </strong>
-                      <span className="text-xs text-[#6b6b6b]">clique na linha</span>
+                      <span className="text-xs text-[#6b6b6b]">clique em uma linha</span>
                     </div>
 
                     <div className="flex-1 min-h-[260px]">
@@ -377,7 +363,7 @@ export default function Page() {
                   </div>
                 </div>
 
-        
+
               </div>
             </section>
 
@@ -391,36 +377,29 @@ export default function Page() {
 
 
                 <SubstitutionItem
-                  imageSrc="/mussarela.png"
+                  imageSrc="/alimentos/pasta-amendoim.png"
                   meal="Café da manhã"
-                  original="Queijo Mussarela"
-                  alternative="Queijo Ricota"
-                  description="tem média de emissão abaixo do normal e pode ajudar a reduzir sua pegada."
+                  original="Queijo Prato / Presunto"
+                  alternative="Pasta de Amendoim"
+                  description="A pasta de amendoim (Paçoca) tem uma pegada de carbono 4x menor (133 gCO₂e/100g) que os frios do seu sanduíche, sendo uma excelente troca."
                 />
 
                 <SubstitutionItem
-                  imageSrc="/bisteca.png"
+                  imageSrc="/alimentos/arroz-feijao.png"
                   meal="Almoço"
-                  original="Bisteca bovina"
-                  alternative="Dobradinha"
-                  description="é uma opção com média de emissão abaixo do normal e pode lhe ajudar a reduzir sua pegada."
+                  original="Bisteca Bovina"
+                  alternative="Feijão com Arroz (Vegano)"
+                  description="O consumo de Feijão com Arroz (90 gCO₂e/100g) elimina o pico de 10.2 kg CO₂e causado pela carne bovina na sua refeição."
                 />
 
                 <SubstitutionItem
-                  imageSrc="/brigadeiro.png"
+                  imageSrc="/alimentos/file-peixe.png"
                   meal="Jantar"
-                  original="Brigadeiro"
-                  alternative="Beijinho"
-                  description="é uma opção com média de emissão abaixo do normal e pode lhe ajudar a reduzir sua pegada."
+                  original="Hambúrguer Bovina (Cheeseburger)"
+                  alternative="Filé de Peixe Grelhado"
+                  description="Trocar por Peixe de Água Doce Grelhado (615 gCO₂e/100g) reduz o impacto do seu sanduíche em 38% e elimina a pegada hídrica de água verde/azul."
                 />
 
-                <SubstitutionItem
-                  imageSrc="/coca.png"
-                  meal="Ceia"
-                  original="Coca-cola"
-                  alternative="São Geraldo"
-                  description="é uma opção com média de emissão abaixo do normal e pode lhe ajudar a reduzir sua pegada."
-                />
 
                 <div className="hidden lg:block" />
               </div>
@@ -433,6 +412,8 @@ export default function Page() {
 }
 
 /* ----------------- Componentes auxiliares (inline) ----------------- */
+
+// ⬅️ SectionButton e MetricCard são mantidos aqui.
 
 function SectionButton({ href, label, active = false }) {
   const base = "w-full h-10 rounded-full px-4 flex items-center gap-3 text-sm transition-shadow";
