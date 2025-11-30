@@ -22,7 +22,6 @@ import {
 // ⬅️ Importação do novo componente de barra lateral secundária
 import SecondarySidebar from "../../components/secondarySidebar";
 
-
 /**
  * Página /resumo — com filtro dropdown (Dia / Semana / Mês / Ano)
  */
@@ -119,7 +118,11 @@ export default function Page() {
     // water series scaled (Variação para longo prazo)
     const waterData = base.waterSeries.map((d) => ({
       day: d.day,
-      litros: Math.round(d.litros * (multiplier > 1 ? (1 + (Math.random() - 0.5) * 0.2) : 1) * multiplier),
+      litros: Math.round(
+        d.litros *
+          (multiplier > 1 ? 1 + (Math.random() - 0.5) * 0.2 : 1) *
+          multiplier
+      ),
     }));
 
     // land scaled
@@ -128,7 +131,7 @@ export default function Page() {
       m2: Math.round(d.m2 * multiplier * 10) / 10, // keep one decimal
     }));
 
-    // metrics scaled 
+    // metrics scaled
     const metrics = {
       carroKm: Math.round(base.metrics.carroKm * multiplier),
       banhoHoras: Math.round(base.metrics.banhoHoras * multiplier * 10) / 10,
@@ -139,19 +142,30 @@ export default function Page() {
   }, [base, multiplier]);
 
   // helper formatting
-  const fmtKg = (v) => `${Number(v).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} kg CO₂e`;
-  const fmtLit = (v) => `${Number(v).toLocaleString("pt-BR", { maximumFractionDigits: 0 })} litros`;
-  const fmtM2 = (v) => `${Number(v).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} m²`;
+  const fmtKg = (v) =>
+    `${Number(v).toLocaleString("pt-BR", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })} kg CO₂e`;
+  const fmtLit = (v) =>
+    `${Number(v).toLocaleString("pt-BR", { maximumFractionDigits: 0 })} litros`;
+  const fmtM2 = (v) =>
+    `${Number(v).toLocaleString("pt-BR", {
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 1,
+    })} m²`;
 
   return (
     <div className="min-h-full w-full font-sans bg-[#f3eef6] p-6">
       <div className="w-full flex flex-col lg:flex-row gap-6 items-start">
-
         {/* ⬅️ NOVO COMPONENTE FIXO */}
         <SecondarySidebar />
 
         {/* ⬅️ ESPAÇADOR VAZIO (Reserva o espaço da sidebar fixa no flow da div pai) */}
-        <div className="hidden lg:block w-[240px] flex-shrink-0" aria-hidden="true" />
+        <div
+          className="hidden lg:block w-[240px] flex-shrink-0"
+          aria-hidden="true"
+        />
 
         {/* Main CARD */}
         <main className="flex-1 rounded-2xl bg-[#fff4f8] border border-[#f0e6ef] p-6 lg:p-10 shadow-lg min-h-[640px] w-full">
@@ -159,17 +173,23 @@ export default function Page() {
             {/* Header com dropdown à direita */}
             <div className="flex items-start justify-between gap-4 mb-4">
               <div>
-                <h1 className="text-4xl font-extrabold" style={{ color: BRAND.primary }}>
+                <h1
+                  className="text-4xl font-extrabold"
+                  style={{ color: BRAND.primary }}
+                >
                   Resumo
                 </h1>
                 <p className="mt-2 text-sm" style={{ color: BRAND.mutedText }}>
-                  Um resumo condensado do seu consumo — ajustado para: <strong>{period}</strong>
+                  Um resumo condensado do seu consumo — ajustado para:{" "}
+                  <strong>{period}</strong>
                 </p>
               </div>
 
               {/* Dropdown de período */}
               <div className="mt-1">
-                <label className="sr-only" htmlFor="periodSelect">Período</label>
+                <label className="sr-only" htmlFor="periodSelect">
+                  Período
+                </label>
                 <select
                   id="periodSelect"
                   value={period}
@@ -193,31 +213,50 @@ export default function Page() {
             <section className="grid grid-cols-1 lg:grid-cols-4 gap-6">
               {/* Totais */}
               <div className="rounded-xl bg-[#f8fff6] p-6 shadow-sm lg:col-span-1">
-                <h2 className="text-xl font-semibold mb-3" style={{ color: BRAND.primary }}>
+                <h2
+                  className="text-xl font-semibold mb-3"
+                  style={{ color: BRAND.primary }}
+                >
                   Resumo rápido
                 </h2>
 
                 <div className="space-y-3 text-[#4b6a54]">
                   <div className="flex items-center justify-between">
                     <span className="text-sm">Total de carbono emitido:</span>
-                    <strong className="text-lg">{fmtKg(scaled.totals.co2e)}</strong>
+                    <strong className="text-lg">
+                      {fmtKg(scaled.totals.co2e)}
+                    </strong>
                   </div>
 
                   <div className="flex items-center justify-between">
                     <span className="text-sm">Total de água usada:</span>
-                    <strong className="text-lg">{fmtLit(scaled.totals.water)}</strong>
+                    <strong className="text-lg">
+                      {fmtLit(scaled.totals.water)}
+                    </strong>
                   </div>
 
                   <div className="flex items-center justify-between">
                     <span className="text-sm">Total de terra usada:</span>
-                    <strong className="text-lg">{fmtM2(scaled.totals.land)}</strong>
+                    <strong className="text-lg">
+                      {fmtM2(scaled.totals.land)}
+                    </strong>
                   </div>
                 </div>
 
                 <div className="mt-6 space-y-4">
-                  <MetricCard icon={<MdDirectionsCar size={20} />} title={`${scaled.metrics.carroKm} km`} subtitle="Equivalente em distância de carro" bg={BRAND.orange} />
+                  <MetricCard
+                    icon={<MdDirectionsCar size={20} />}
+                    title={`${scaled.metrics.carroKm} km`}
+                    subtitle="Equivalente em distância de carro"
+                    bg={BRAND.orange}
+                  />
 
-                  <MetricCard icon={<MdShower size={20} />} title={`${scaled.metrics.banhoHoras}h`} subtitle="Horas de chuveiro equivalentes" bg={BRAND.primary} />
+                  <MetricCard
+                    icon={<MdShower size={20} />}
+                    title={`${scaled.metrics.banhoHoras}h`}
+                    subtitle="Horas de chuveiro equivalentes"
+                    bg={BRAND.primary}
+                  />
 
                   <MetricCard
                     icon={<MdLandscape size={20} />}
@@ -225,14 +264,16 @@ export default function Page() {
                     subtitle="Área equivalente (aptos)"
                     bg={BRAND.accent}
                   />
-
                 </div>
               </div>
 
               {/* Gráficos (3) */}
               <div className="rounded-xl bg-[#f6fff9] p-6 shadow-sm lg:col-span-3 flex flex-col">
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-xl font-semibold" style={{ color: BRAND.primary }}>
+                  <h3
+                    className="text-xl font-semibold"
+                    style={{ color: BRAND.primary }}
+                  >
                     Visualizações
                   </h3>
                   <div className="text-sm text-[#6b6b6b]">
@@ -244,22 +285,45 @@ export default function Page() {
                   {/* 1) Bar chart comparativo (média vs você) */}
                   <div className="p-3 bg-white rounded-md shadow-sm flex flex-col">
                     <div className="flex items-center justify-between mb-2">
-                      <strong className="text-sm" style={{ color: BRAND.primary }}>
+                      <strong
+                        className="text-sm"
+                        style={{ color: BRAND.primary }}
+                      >
                         CO₂e por categoria
                       </strong>
-                      <span className="text-xs text-[#6b6b6b]">clique em uma barra</span>
+                      <span className="text-xs text-[#6b6b6b]">
+                        clique em uma barra
+                      </span>
                     </div>
 
                     <div className="flex-1 min-h-[260px]">
                       <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={scaled.co2Data} margin={{ top: 8, right: 8, left: 0, bottom: 6 }}>
+                        <BarChart
+                          data={scaled.co2Data}
+                          margin={{ top: 8, right: 8, left: 0, bottom: 6 }}
+                        >
                           <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="name" tick={{ fill: BRAND.primaryDark }} />
+                          <XAxis
+                            dataKey="name"
+                            tick={{ fill: BRAND.primaryDark }}
+                          />
                           <YAxis />
                           <Tooltip />
                           <Legend />
-                          <Bar dataKey="Média" fill={BRAND.accent} onClick={(d) => setSelectedCO2({ series: "Média", ...d })} />
-                          <Bar dataKey="Você" fill={BRAND.primary} onClick={(d) => setSelectedCO2({ series: "Você", ...d })} />
+                          <Bar
+                            dataKey="Média"
+                            fill={BRAND.accent}
+                            onClick={(d) =>
+                              setSelectedCO2({ series: "Média", ...d })
+                            }
+                          />
+                          <Bar
+                            dataKey="Você"
+                            fill={BRAND.primary}
+                            onClick={(d) =>
+                              setSelectedCO2({ series: "Você", ...d })
+                            }
+                          />
                         </BarChart>
                       </ResponsiveContainer>
                     </div>
@@ -267,8 +331,13 @@ export default function Page() {
                     <div className="mt-3 text-sm text-[#4b6a54] min-h-[32px]">
                       {selectedCO2 ? (
                         <span>
-                          Selecionado: <strong>{selectedCO2.series}</strong> — {selectedCO2.payload.name}:{" "}
-                          <strong>{selectedCO2.series === "Média" ? selectedCO2.payload["Média"] : selectedCO2.payload["Você"]}</strong>
+                          Selecionado: <strong>{selectedCO2.series}</strong> —{" "}
+                          {selectedCO2.payload.name}:{" "}
+                          <strong>
+                            {selectedCO2.series === "Média"
+                              ? selectedCO2.payload["Média"]
+                              : selectedCO2.payload["Você"]}
+                          </strong>
                         </span>
                       ) : (
                         <span>Clique em uma barra para ver detalhes</span>
@@ -279,10 +348,15 @@ export default function Page() {
                   {/* 2) Area chart (água) */}
                   <div className="p-3 bg-white rounded-md shadow-sm flex flex-col">
                     <div className="flex items-center justify-between mb-2">
-                      <strong className="text-sm" style={{ color: BRAND.primary }}>
+                      <strong
+                        className="text-sm"
+                        style={{ color: BRAND.primary }}
+                      >
                         Consumo de água (amostra)
                       </strong>
-                      <span className="text-xs text-[#6b6b6b]">clique em um ponto</span>
+                      <span className="text-xs text-[#6b6b6b]">
+                        clique em um ponto
+                      </span>
                     </div>
 
                     <div className="flex-1 min-h-[260px]">
@@ -291,22 +365,48 @@ export default function Page() {
                           data={scaled.waterData}
                           margin={{ top: 8, right: 8, left: 0, bottom: 6 }}
                           onClick={(e) => {
-                            if (e && e.activePayload && e.activePayload.length) {
+                            if (
+                              e &&
+                              e.activePayload &&
+                              e.activePayload.length
+                            ) {
                               setSelectedWater(e.activePayload[0].payload);
                             }
                           }}
                         >
                           <defs>
-                            <linearGradient id="colorWaterGrad" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="5%" stopColor={BRAND.primary} stopOpacity={0.8} />
-                              <stop offset="95%" stopColor={BRAND.primary} stopOpacity={0.08} />
+                            <linearGradient
+                              id="colorWaterGrad"
+                              x1="0"
+                              y1="0"
+                              x2="0"
+                              y2="1"
+                            >
+                              <stop
+                                offset="5%"
+                                stopColor={BRAND.primary}
+                                stopOpacity={0.8}
+                              />
+                              <stop
+                                offset="95%"
+                                stopColor={BRAND.primary}
+                                stopOpacity={0.08}
+                              />
                             </linearGradient>
                           </defs>
                           <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="day" tick={{ fill: BRAND.primaryDark }} />
+                          <XAxis
+                            dataKey="day"
+                            tick={{ fill: BRAND.primaryDark }}
+                          />
                           <YAxis />
                           <Tooltip />
-                          <Area type="monotone" dataKey="litros" stroke={BRAND.primary} fill="url(#colorWaterGrad)" />
+                          <Area
+                            type="monotone"
+                            dataKey="litros"
+                            stroke={BRAND.primary}
+                            fill="url(#colorWaterGrad)"
+                          />
                         </AreaChart>
                       </ResponsiveContainer>
                     </div>
@@ -314,10 +414,18 @@ export default function Page() {
                     <div className="mt-3 text-sm text-[#4b6a54] min-h-[32px]">
                       {selectedWater ? (
                         <span>
-                          {selectedWater.day}: <strong>{Number(selectedWater.litros).toLocaleString("pt-BR")} litros</strong>
+                          {selectedWater.day}:{" "}
+                          <strong>
+                            {Number(selectedWater.litros).toLocaleString(
+                              "pt-BR"
+                            )}{" "}
+                            litros
+                          </strong>
                         </span>
                       ) : (
-                        <span>Clique em um ponto do gráfico para selecionar</span>
+                        <span>
+                          Clique em um ponto do gráfico para selecionar
+                        </span>
                       )}
                     </div>
                   </div>
@@ -325,10 +433,15 @@ export default function Page() {
                   {/* 3) Line chart (terra) */}
                   <div className="p-3 bg-white rounded-md shadow-sm flex flex-col">
                     <div className="flex items-center justify-between mb-2">
-                      <strong className="text-sm" style={{ color: BRAND.primary }}>
+                      <strong
+                        className="text-sm"
+                        style={{ color: BRAND.primary }}
+                      >
                         Uso de terra por refeição
                       </strong>
-                      <span className="text-xs text-[#6b6b6b]">clique em uma linha</span>
+                      <span className="text-xs text-[#6b6b6b]">
+                        clique em uma linha
+                      </span>
                     </div>
 
                     <div className="flex-1 min-h-[260px]">
@@ -337,16 +450,29 @@ export default function Page() {
                           data={scaled.landData}
                           margin={{ top: 8, right: 8, left: 0, bottom: 6 }}
                           onClick={(e) => {
-                            if (e && e.activePayload && e.activePayload.length) {
+                            if (
+                              e &&
+                              e.activePayload &&
+                              e.activePayload.length
+                            ) {
                               setSelectedLand(e.activePayload[0].payload);
                             }
                           }}
                         >
                           <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="meal" tick={{ fill: BRAND.primaryDark }} />
+                          <XAxis
+                            dataKey="meal"
+                            tick={{ fill: BRAND.primaryDark }}
+                          />
                           <YAxis />
                           <Tooltip />
-                          <Line type="monotone" dataKey="m2" stroke={BRAND.accent} strokeWidth={2.5} activeDot={{ r: 6, fill: BRAND.primary }} />
+                          <Line
+                            type="monotone"
+                            dataKey="m2"
+                            stroke={BRAND.accent}
+                            strokeWidth={2.5}
+                            activeDot={{ r: 6, fill: BRAND.primary }}
+                          />
                         </LineChart>
                       </ResponsiveContainer>
                     </div>
@@ -354,30 +480,32 @@ export default function Page() {
                     <div className="mt-3 text-sm text-[#4b6a54] min-h-[32px]">
                       {selectedLand ? (
                         <span>
-                          {selectedLand.meal}: <strong>{selectedLand.m2} m²</strong>
+                          {selectedLand.meal}:{" "}
+                          <strong>{selectedLand.m2} m²</strong>
                         </span>
                       ) : (
-                        <span>Clique num ponto da linha para ver a área usada</span>
+                        <span>
+                          Clique num ponto da linha para ver a área usada
+                        </span>
                       )}
                     </div>
                   </div>
                 </div>
-
-
               </div>
             </section>
 
             {/* Substituições */}
             <section className="rounded-xl bg-[#fffafc] p-6 mt-6">
-              <h2 className="text-2xl font-bold mb-4" style={{ color: BRAND.primary }}>
+              <h2
+                className="text-2xl font-bold mb-4"
+                style={{ color: BRAND.primary }}
+              >
                 Possíveis substituições
               </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-6">
-
-
                 <SubstitutionItem
-                  imageSrc="/alimentos/pasta-amendoim.png"
+                  imageSrc="/alimentos/pasta-amendoim.jpeg"
                   meal="Café da manhã"
                   original="Queijo Prato / Presunto"
                   alternative="Pasta de Amendoim"
@@ -393,13 +521,12 @@ export default function Page() {
                 />
 
                 <SubstitutionItem
-                  imageSrc="/alimentos/file-peixe.png"
+                  imageSrc="/alimentos/file-peixe.jpg"
                   meal="Jantar"
                   original="Hambúrguer Bovina (Cheeseburger)"
                   alternative="Filé de Peixe Grelhado"
                   description="Trocar por Peixe de Água Doce Grelhado (615 gCO₂e/100g) reduz o impacto do seu sanduíche em 38% e elimina a pegada hídrica de água verde/azul."
                 />
-
 
                 <div className="hidden lg:block" />
               </div>
@@ -416,8 +543,11 @@ export default function Page() {
 // ⬅️ SectionButton e MetricCard são mantidos aqui.
 
 function SectionButton({ href, label, active = false }) {
-  const base = "w-full h-10 rounded-full px-4 flex items-center gap-3 text-sm transition-shadow";
-  const classes = active ? "bg-[#2b6b4a] text-white shadow" : "bg-white/80 text-[#4b6a54] hover:shadow-md";
+  const base =
+    "w-full h-10 rounded-full px-4 flex items-center gap-3 text-sm transition-shadow";
+  const classes = active
+    ? "bg-[#2b6b4a] text-white shadow"
+    : "bg-white/80 text-[#4b6a54] hover:shadow-md";
 
   return (
     <Link href={href} className={`${base} ${classes}`}>
@@ -430,7 +560,10 @@ function MetricCard({ icon, title, subtitle, bg = BRAND.primary }) {
   // allow hex string bg or fallback class
   const styleBg = typeof bg === "string" ? { backgroundColor: bg } : undefined;
   return (
-    <div className="rounded-lg p-3 text-white flex gap-3 items-start" style={styleBg}>
+    <div
+      className="rounded-lg p-3 text-white flex gap-3 items-start"
+      style={styleBg}
+    >
       <div className="p-2 rounded-md bg-white/10">{icon}</div>
       <div>
         <div className="text-sm font-bold">{title}</div>
@@ -440,21 +573,38 @@ function MetricCard({ icon, title, subtitle, bg = BRAND.primary }) {
   );
 }
 
-function SubstitutionItem({ imageSrc, meal, original, alternative, description }) {
+function SubstitutionItem({
+  imageSrc,
+  meal,
+  original,
+  alternative,
+  description,
+}) {
   return (
     <div className="flex flex-col gap-3 items-start bg-white rounded-md p-3 shadow-sm">
       <div className="w-full flex items-center gap-4">
         <div className="w-28 h-20 rounded-md overflow-hidden bg-white/60 flex-shrink-0">
-          <Image src={imageSrc} width={160} height={120} alt={original} className="object-cover" />
+          <Image
+            src={imageSrc}
+            width={160}
+            height={120}
+            alt={original}
+            className="object-cover"
+          />
         </div>
 
         <div className="flex-1">
-          <div className="text-sm font-semibold" style={{ color: BRAND.primary }}>
+          <div
+            className="text-sm font-semibold"
+            style={{ color: BRAND.primary }}
+          >
             Em seu <span className="font-bold">{meal}</span>, o produto{" "}
-            <span className="italic font-bold">{original}</span> pode ser substituído por{" "}
-            <span className="font-bold">{alternative}</span>.
+            <span className="italic font-bold">{original}</span> pode ser
+            substituído por <span className="font-bold">{alternative}</span>.
           </div>
-          <p className="mt-2 text-sm text-[#6b6b6b]">{alternative} {description}</p>
+          <p className="mt-2 text-sm text-[#6b6b6b]">
+            {alternative} {description}
+          </p>
         </div>
       </div>
     </div>
