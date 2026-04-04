@@ -13,8 +13,8 @@ def create_meal(meal: MealCreate, db: Session = Depends(get_db)):
 
 
 @router.get("/", response_model=MealListResponse)
-def list_meals(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-    return meal_service.get_meals(db, skip=skip, limit=limit)
+def list_meals(page: int = 1, per_page: int = 10, db: Session = Depends(get_db)):
+    return meal_service.get_meals(db, page=page, per_page=per_page)
 
 
 @router.get("/{meal_id}", response_model=MealResponse)
@@ -29,9 +29,9 @@ def get_meal(meal_id: int, db: Session = Depends(get_db)):
 
 @router.get("/user/{user_id}", response_model=MealListResponse)
 def list_meals_by_user(
-    user_id: int, skip: int = 0, limit: int = 10, db: Session = Depends(get_db)
+    user_id: int, page: int = 1, per_page: int = 10, db: Session = Depends(get_db)
 ):
-    return meal_service.get_meals_by_user(db, user_id, skip=skip, limit=limit)
+    return meal_service.get_meals_by_user(db, user_id, page=page, per_page=per_page)
 
 
 @router.delete("/{meal_id}", response_model=MealResponse)

@@ -1,19 +1,25 @@
-import math
-
 from models.meal import Meal
 from schemas.meal_schema import MealCreate, MealListResponse
 from sqlalchemy.orm import Session
 
 
-def get_meals(db: Session, skip: int = 0, limit: int = 10) -> MealListResponse:
+def get_meals(db: Session, page: int = 1, per_page: int = 10) -> MealListResponse:
     total = db.query(Meal).count()
-    items = db.query(Meal).offset(skip).limit(limit).all()
+    total_pages = max((total + per_page - 1) // per_page, 1)
+
+    if page < 1:
+        page = 1
+
+    if page > total_pages:
+        return MealListResponse(
+            page=page, total=total, total_pages=total_pages, per_page=per_page, items=[]
+        )
+
+    skip = (page - 1) * per_page
+    items = db.query(Meal).offset(skip).limit(per_page).all()
 
     return MealListResponse(
-        items=items,
-        total=total,
-        total_pages=math.ceil(total / limit),
-        per_page=limit,
+        page=page, total=total, total_pages=total_pages, per_page=per_page, items=items
     )
 
 
@@ -21,16 +27,24 @@ def get_meal_by_id(db: Session, meal_id: int) -> Meal | None:
     return db.query(Meal).filter(Meal.id == meal_id).first()
 
 
-def get_meals_by_user(db: Session, user_id: int, skip: int = 0, limit: int = 10) -> MealListResponse:
+def get_meals_by_user(db: Session, user_id: int, page: int = 1, per_page: int = 10) -> MealListResponse:
     query = db.query(Meal).filter(Meal.user_id == user_id)
     total = query.count()
-    items = query.offset(skip).limit(limit).all()
+    total_pages = max((total + per_page - 1) // per_page, 1)
+
+    if page < 1:
+        page = 1
+
+    if page > total_pages:
+        return MealListResponse(
+            page=page, total=total, total_pages=total_pages, per_page=per_page, items=[]
+        )
+
+    skip = (page - 1) * per_page
+    items = query.offset(skip).limit(per_page).all()
 
     return MealListResponse(
-        items=items,
-        total=total,
-        total_pages=math.ceil(total / limit),
-        per_page=limit,
+        page=page, total=total, total_pages=total_pages, per_page=per_page, items=items
     )
 
 

@@ -1,19 +1,25 @@
-import math
-
 from models.user import User
 from schemas.user_schema import UserCreate, UserListResponse
 from sqlalchemy.orm import Session
 
 
-def get_users(db: Session, skip: int = 0, limit: int = 10) -> UserListResponse:
+def get_users(db: Session, page: int = 1, per_page: int = 10) -> UserListResponse:
     total = db.query(User).count()
-    items = db.query(User).offset(skip).limit(limit).all()
+    total_pages = max((total + per_page - 1) // per_page, 1)
+
+    if page < 1:
+        page = 1
+
+    if page > total_pages:
+        return UserListResponse(
+            page=page, total=total, total_pages=total_pages, per_page=per_page, items=[]
+        )
+
+    skip = (page - 1) * per_page
+    items = db.query(User).offset(skip).limit(per_page).all()
 
     return UserListResponse(
-        items=items,
-        total=total,
-        total_pages=math.ceil(total / limit),
-        per_page=limit,
+        page=page, total=total, total_pages=total_pages, per_page=per_page, items=items
     )
 
 

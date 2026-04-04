@@ -13,15 +13,15 @@ def create_food(food: FoodCreate, db: Session = Depends(get_db)):
 
 
 @router.get("/", response_model=FoodListResponse)
-def list_foods(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-    return food_service.get_foods(db, skip=skip, limit=limit)
+def list_foods(page: int = 1, per_page: int = 10, db: Session = Depends(get_db)):
+    return food_service.get_foods(db, page=page, per_page=per_page)
 
 
 @router.get("/search", response_model=FoodListResponse)
 def search_foods(
-    query: str, skip: int = 0, limit: int = 10, db: Session = Depends(get_db)
+    query: str, page: int = 1, per_page: int = 10, db: Session = Depends(get_db)
 ):
-    return food_service.search_foods(db, query, skip=skip, limit=limit)
+    return food_service.search_foods(db, query, page=page, per_page=per_page)
 
 
 @router.get("/{food_id}", response_model=FoodResponse)

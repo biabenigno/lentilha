@@ -1,32 +1,46 @@
-import math
-
 from models.food import Food
 from schemas.food_schema import FoodCreate, FoodListResponse
 from sqlalchemy.orm import Session
 
 
-def get_foods(db: Session, skip: int = 0, limit: int = 10) -> FoodListResponse:
+def get_foods(db: Session, page: int = 1, per_page: int = 10) -> FoodListResponse:
     total = db.query(Food).count()
-    items = db.query(Food).offset(skip).limit(limit).all()
+    total_pages = max((total + per_page - 1) // per_page, 1)
+
+    if page < 1:
+        page = 1
+
+    if page > total_pages:
+        return FoodListResponse(
+            page=page, total=total, total_pages=total_pages, per_page=per_page, items=[]
+        )
+
+    skip = (page - 1) * per_page
+    items = db.query(Food).offset(skip).limit(per_page).all()
 
     return FoodListResponse(
-        items=items,
-        total=total,
-        total_pages=math.ceil(total / limit),
-        per_page=limit,
+        page=page, total=total, total_pages=total_pages, per_page=per_page, items=items
     )
 
 
-def search_foods(db: Session, query: str, skip: int = 0, limit: int = 10) -> FoodListResponse:
+def search_foods(db: Session, query: str, page: int = 1, per_page: int = 10) -> FoodListResponse:
     base_query = db.query(Food).filter(Food.name.ilike(f"%{query}%"))
     total = base_query.count()
-    items = base_query.offset(skip).limit(limit).all()
+    total_pages = max((total + per_page - 1) // per_page, 1)
+
+    if page < 1:
+        page = 1
+
+    if page > total_pages:
+        return FoodListResponse(
+            page=page, total=total, total_pages=total_pages, per_page=per_page, items=[]
+        )
+
+    skip = (page - 1) * per_page
+    items = base_query.offset(skip).limit(per_page).all()
 
     return FoodListResponse(
-        items=items,
-        total=total,
-        total_pages=math.ceil(total / limit) if limit else 0,
-        per_page=limit,
+        page=page, total=total, total_pages=total_pages, per_page=per_page, items=items
     )
 
 
