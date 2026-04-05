@@ -9,16 +9,19 @@ router = APIRouter(prefix="/meals", tags=["meals"])
 
 @router.post("/", response_model=MealResponse, status_code=201)
 def create_meal(meal: MealCreate, db: Session = Depends(get_db)):
+    """Register a new meal entry linking a user to a food item with quantity and date."""
     return meal_service.create_meal(db, meal)
 
 
 @router.get("/", response_model=MealListResponse)
 def list_meals(page: int = 1, per_page: int = 10, db: Session = Depends(get_db)):
+    """List all meals with paginated results."""
     return meal_service.get_meals(db, page=page, per_page=per_page)
 
 
 @router.get("/{meal_id}", response_model=MealResponse)
 def get_meal(meal_id: int, db: Session = Depends(get_db)):
+    """Retrieve a specific meal by its ID."""
     meal = meal_service.get_meal_by_id(db, meal_id)
 
     if not meal:
@@ -31,11 +34,13 @@ def get_meal(meal_id: int, db: Session = Depends(get_db)):
 def list_meals_by_user(
     user_id: int, page: int = 1, per_page: int = 10, db: Session = Depends(get_db)
 ):
+    """List all meals for a specific user with paginated results."""
     return meal_service.get_meals_by_user(db, user_id, page=page, per_page=per_page)
 
 
 @router.delete("/{meal_id}", response_model=MealResponse)
 def delete_meal(meal_id: int, db: Session = Depends(get_db)):
+    """Delete a meal by its ID."""
     meal = meal_service.delete_meal(db, meal_id)
 
     if not meal:
