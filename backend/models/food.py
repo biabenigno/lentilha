@@ -22,4 +22,6 @@ class Food(BASE):
 
     created_at = Column(Date, server_default=func.now(), nullable=False)
 
+    webscraped_image = Column(String, nullable=True)
+
     meals = relationship("Meal", back_populates="food")
