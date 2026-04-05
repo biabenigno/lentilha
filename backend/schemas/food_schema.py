@@ -25,5 +25,10 @@ class FoodResponse(FoodBase):
     model_config = {"from_attributes": True}
 
 
+class FoodDetailResponse(BaseModel):
+    food: FoodResponse
+    lower_impact_suggestion: FoodResponse | None = None
+
+
 class FoodListResponse(Pagination):
     items: list[FoodResponse]

@@ -1,6 +1,6 @@
 from database import get_db
 from fastapi import APIRouter, Depends, HTTPException
-from schemas.food_schema import FoodCreate, FoodListResponse, FoodResponse
+from schemas.food_schema import FoodCreate, FoodDetailResponse, FoodListResponse, FoodResponse
 from services import food_service
 from sqlalchemy.orm import Session
 
@@ -24,14 +24,14 @@ def search_foods(
     return food_service.search_foods(db, query, page=page, per_page=per_page)
 
 
-@router.get("/{food_id}", response_model=FoodResponse)
+@router.get("/{food_id}", response_model=FoodDetailResponse)
 def get_food(food_id: int, db: Session = Depends(get_db)):
-    food = food_service.get_food_by_id(db, food_id)
+    result = food_service.get_food_by_id(db, food_id)
 
-    if not food:
+    if not result:
         raise HTTPException(status_code=404, detail="Food not found")
 
-    return food
+    return result
 
 
 @router.delete("/{food_id}", response_model=FoodResponse)

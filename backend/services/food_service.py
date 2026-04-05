@@ -1,5 +1,6 @@
 from models.food import Food
-from schemas.food_schema import FoodCreate, FoodListResponse
+from schemas.food_schema import FoodCreate, FoodDetailResponse, FoodListResponse
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 
@@ -44,8 +45,39 @@ def search_foods(db: Session, query: str, page: int = 1, per_page: int = 10) -> 
     )
 
 
-def get_food_by_id(db: Session, food_id: int) -> Food | None:
-    return db.query(Food).filter(Food.id == food_id).first()
+def get_food_by_id(db: Session, food_id: int) -> FoodDetailResponse | None:
+    food = db.query(Food).filter(Food.id == food_id).first()
+
+    if not food:
+        return None
+
+    food_impact = _average_impact(food)
+    suggestion = None
+
+    if food_impact is not None:
+        impact_expr = (
+            func.coalesce(Food.carbon_footprint, 0)
+            + func.coalesce(Food.water_footprint, 0)
+            + func.coalesce(Food.ecological_footprint, 0)
+        ) / 3.0
+
+        max_impact = food_impact * 0.8
+
+        suggestion = (
+            db.query(Food)
+            .filter(Food.id != food.id, impact_expr <= max_impact)
+            .order_by(impact_expr.desc())
+            .first()
+        )
+
+    return FoodDetailResponse(food=food, lower_impact_suggestion=suggestion)
+
+
+def _average_impact(food: Food) -> float | None:
+    values = [v for v in [food.carbon_footprint, food.water_footprint, food.ecological_footprint] if v is not None]
+    if not values:
+        return None
+    return sum(values) / len(values)
 
 
 def create_food(db: Session, food: FoodCreate) -> Food:
