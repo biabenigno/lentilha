@@ -17,7 +17,7 @@ const BRAND = {
 };
 
 // Componente auxiliar para navegação (Substitui SectionButton)
-function NavButton({ href, label, currentPath }) {
+function NavButton({ href, label, icon, currentPath }) {
     const isActive = href === currentPath;
 
     const base = "w-full h-10 rounded-full px-4 flex items-center gap-3 text-sm transition-shadow";
@@ -25,6 +25,7 @@ function NavButton({ href, label, currentPath }) {
 
     return (
         <Link href={href} className={`${base} ${classes}`}>
+            {icon && <span className="flex items-center justify-center">{icon}</span>}
             <span>{label}</span>
         </Link>
     );

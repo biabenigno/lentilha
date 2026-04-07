@@ -11,13 +11,13 @@ const BRAND = {
   primaryDark: "#146151",
   accent: "#B4CF66",
   mutedText: "#6b6b6b",
-  lightPurple: "#f3eef6"
+  lightGreen: "#f4f8f4"
 };
 
 const FeatureCard = ({ icon: Icon, title, description }) => (
   // Card com border-left grosso para destacar o conteúdo
   <div className="flex flex-col gap-2 p-5 bg-white rounded-lg shadow-md border-l-4 border-[#FFAE3C] hover:shadow-xl transition-shadow duration-300">
-    <Icon size={32} className="text-purple-700" />
+    <Icon size={32} className="text-[#448040]" />
     <h3 className="text-lg font-bold" style={{ color: BRAND.primaryDark }}>{title}</h3>
     <p className="text-sm text-gray-700">{description}</p>
   </div>
@@ -26,7 +26,7 @@ const FeatureCard = ({ icon: Icon, title, description }) => (
 export default function Home() {
   return (
     // Garantindo que a tela tenha altura 100vh e sem scroll
-    <div className="flex flex-col items-center pt-12 lg:pt-20 font-sans bg-[#f3eef6] pb-10">
+    <div className="flex flex-col items-center pt-12 lg:pt-20 font-sans bg-[#f4f8f4] pb-10">
 
       <main className="flex flex-col gap-16 items-center text-center max-w-5xl px-4 flex-grow">
 

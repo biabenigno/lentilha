@@ -65,7 +65,7 @@ export default function Sidebar() {
 
         <SidebarItem icon={MdHome} label="Conhecer" href="/" />
         <SidebarItem icon={MdSearch} label="Pesquisar" href="/pesquisa" />
-        <SidebarItem icon={MdAssessment} label="Meu Impacto" href="/resumo" />
+        <SidebarItem icon={MdAssessment} label="Meu Impacto" href="/almoco" />
       </nav>
     </aside>
   );
