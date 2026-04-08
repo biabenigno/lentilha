@@ -74,7 +74,7 @@ const SearchResultItem = ({ nome, descricao, imagem, id, onAdd }) => {
           </div>
         </div>
 
-        <div 
+        <div
           className="
             w-10 h-10 
             rounded-full 
@@ -95,6 +95,9 @@ const SearchResultItem = ({ nome, descricao, imagem, id, onAdd }) => {
 export default function PesquisaPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [toast, setToast] = useState({ show: false, message: '' });
@@ -115,8 +118,19 @@ export default function PesquisaPage() {
     }
   };
 
-  const handleSearch = async () => {
-    const term = searchTerm.trim();
+  const handleSearch = async (overrideTerm = null) => {
+    const termToUse = typeof overrideTerm === 'string' ? overrideTerm : searchTerm;
+    const term = termToUse.trim();
+    
+    if (typeof overrideTerm === 'string') {
+      setSearchTerm(overrideTerm);
+      setIsTyping(false);
+    } else {
+      setIsTyping(false);
+    }
+    
+    setShowSuggestions(false);
+    
     if (!term) {
       setSearchResults([]);
       setHasSearched(false);
@@ -137,6 +151,29 @@ export default function PesquisaPage() {
     }
   };
 
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(async () => {
+      const term = searchTerm.trim();
+      if (term) {
+        try {
+          const data = await searchFoods(term);
+          const mappedResults = (data.items || []).map(item => mapBackendFoodToUI(item));
+          setSuggestions(mappedResults);
+          if (mappedResults.length > 0 && isTyping) {
+            setShowSuggestions(true);
+          }
+        } catch (error) {
+          console.error("Erro ao carregar sugestões:", error);
+        }
+      } else {
+        setSuggestions([]);
+        setShowSuggestions(false);
+      }
+    }, 400);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchTerm]);
+
   const handleKeyDown = (event) => {
     if (event.key === 'Enter') {
       handleSearch();
@@ -145,7 +182,7 @@ export default function PesquisaPage() {
 
   return (
     <div className="flex flex-col items-center justify-center h-full w-full pt-20 relative">
-      
+
       {/* --- TOAST NOTIFICATION --- */}
       <AnimatePresence>
         {toast.show && (
@@ -186,8 +223,17 @@ export default function PesquisaPage() {
             type="text"
             placeholder="Insira aqui o nome do alimento..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setIsTyping(true);
+            }}
             onKeyDown={handleKeyDown}
+            onFocus={() => {
+              if (suggestions.length > 0 && searchTerm.trim() !== '') {
+                setShowSuggestions(true);
+              }
+            }}
+            onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
             className="
               w-full 
               py-4 
@@ -205,13 +251,37 @@ export default function PesquisaPage() {
           />
 
           <button
-            onClick={handleSearch}
+            onClick={() => handleSearch()}
             className={`absolute right-6 transition-colors ${isLoading ? 'text-gray-300' : 'text-gray-400 hover:text-[#448040]'}`}
             disabled={isLoading}
             aria-label="Pesquisar alimento"
           >
             <MdSearch size={28} className={isLoading ? "animate-pulse" : ""} />
           </button>
+
+          {/* AUTOCOMPLETE DROPDOWN */}
+          <AnimatePresence>
+            {showSuggestions && suggestions.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.15 }}
+                className="absolute top-[110%] left-0 w-full bg-white border border-gray-100 shadow-xl rounded-2xl overflow-hidden z-50 flex flex-col max-h-[300px] overflow-y-auto"
+              >
+                {suggestions.map((item) => (
+                  <div 
+                    key={item.id} 
+                    onClick={() => handleSearch(item.nome)}
+                    className="flex items-center px-6 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-50 last:border-0 transition-colors"
+                  >
+                    <MdSearch className="text-gray-400 mr-3" size={20} />
+                    <span className="text-[#146151] font-medium">{item.nome}</span>
+                  </div>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
 
