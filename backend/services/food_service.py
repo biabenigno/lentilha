@@ -1,6 +1,6 @@
 from models.food import Food
 from schemas.food_schema import FoodCreate, FoodDetailResponse, FoodListResponse
-from sqlalchemy import func
+from sqlalchemy import func, String, cast
 from sqlalchemy.orm import Session
 
 
@@ -62,13 +62,29 @@ def get_food_by_id(db: Session, food_id: int) -> FoodDetailResponse | None:
         ) / 3.0
 
         max_impact = food_impact * 0.8
+        suggestion = None
 
-        suggestion = (
-            db.query(Food)
-            .filter(Food.id != food.id, impact_expr <= max_impact)
-            .order_by(impact_expr.desc())
-            .first()
-        )
+        if food.pof_code is not None:
+            prefix = str(food.pof_code)[:2]
+            
+            suggestion = (
+                db.query(Food)
+                .filter(
+                    Food.id != food.id, 
+                    impact_expr <= max_impact,
+                    cast(Food.pof_code, String).like(f"{prefix}%")
+                )
+                .order_by(impact_expr.desc())
+                .first()
+            )
+        
+        if not suggestion:
+            suggestion = (
+                db.query(Food)
+                .filter(Food.id != food.id, impact_expr <= max_impact)
+                .order_by(impact_expr.desc())
+                .first()
+            )
 
     return FoodDetailResponse(food=food, lower_impact_suggestion=suggestion)
 

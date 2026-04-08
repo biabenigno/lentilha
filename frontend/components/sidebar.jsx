@@ -87,7 +87,7 @@ const TestToggle = () => {
 
 export default function Sidebar() {
   return (
-    <aside className="w-24 flex flex-col items-center pt-8 pb-6 border-r border-gray-100 bg-white fixed h-full z-10 left-0 top-0">
+    <aside className="hidden md:flex w-24 flex-col items-center pt-8 pb-6 border-r border-gray-100 bg-white fixed h-full z-20 left-0 top-0">
       <SidebarItem icon={MdPerson} isProfile={true} href="/perfil" />
       <TestToggle />
       <nav className="flex flex-col items-center gap-6">

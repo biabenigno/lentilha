@@ -3,6 +3,7 @@ import { Roboto } from "next/font/google";
 import "./globals.css";
 import Sidebar from "../components/sidebar";
 import TopBar from "../components/topbar";
+import BottomNav from "../components/bottomNav";
 
 const roboto = Roboto({
   subsets: ["latin"],
@@ -23,19 +24,17 @@ export default function RootLayout({ children }) {
         
         <Sidebar />
 
-        {/* 2. O 'main' ocupa a altura total da tela (h-screen) */}
-        <main className="flex-1 flex flex-col ml-24 h-screen">
-          
+        <main className="flex-1 flex flex-col md:ml-24 min-h-screen overflow-x-hidden">
           <TopBar />
           
           {/* 3. AQUI ESTÁ O SEGREDO: 
               - flex-1: Ocupa todo o espaço abaixo da TopBar.
               - overflow-y-auto: A barra de rolagem aparece SÓ AQUI se o conteúdo for grande.
           */}
-          <div className="flex-1 p-8 overflow-y-auto bg-white">
+          <div className="flex-1 overflow-y-auto pb-20 md:pb-0">
             {children}
           </div>
-
+          <BottomNav />
         </main>
 
       </body>

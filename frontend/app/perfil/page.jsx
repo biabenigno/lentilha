@@ -29,10 +29,12 @@ const MOCK_USER = {
 function DetailItem({ icon: Icon, label, value }) {
     return (
         <div className="flex items-center gap-4 p-3 bg-white rounded-lg shadow-sm">
-            <Icon size={24} className="text-purple-600" />
-            <div>
-                <p className="text-xs text-gray-500">{label}</p>
-                <p className="font-medium text-gray-800">{value}</p>
+            <div className="flex-shrink-0">
+                <Icon size={24} className="text-purple-600" />
+            </div>
+            <div className="min-w-0 flex-1">
+                <p className="text-xs text-gray-500 truncate">{label}</p>
+                <p className="font-medium text-gray-800 break-words">{value}</p>
             </div>
         </div>
     );
@@ -50,13 +52,13 @@ export default function PerfilPage() {
                 <main>
                     <header className="flex items-center justify-between mb-8">
                         <div>
-                            <h1 className="text-3xl font-extrabold" style={{ color: BRAND.primary }}>Meu Perfil</h1>
+                            <h1 className="text-2xl font-extrabold" style={{ color: BRAND.primary }}>Meu Perfil</h1>
                             <p className="text-sm mt-1 text-[#6b6b6b]">Gerencie suas informações e configurações da conta.</p>
                         </div>
                     </header>
 
-                    {/* ESTRUTURA DE 3 COLUNAS LADO A LADO */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+                    {/* ESTRUTURA DE COLUNAS RESPONSIVAS */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 items-start">
 
                         {/* 1. CARD AVATAR (Mudar foto) */}
                         <div className="flex flex-col items-center">
@@ -68,7 +70,7 @@ export default function PerfilPage() {
                                     height={150}
                                     className="object-cover rounded-full mx-auto mb-4 border-4 border-gray-100 shadow-md"
                                 />
-                                <p className="text-lg font-bold">{MOCK_USER.name}</p>
+                                <p className="text-base font-bold">{MOCK_USER.name}</p>
                                 <p className="text-sm text-gray-500">Usuário Lentilha</p>
 
                                 <Link href="/perfil/editar" className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-purple-600 hover:underline">
@@ -81,7 +83,7 @@ export default function PerfilPage() {
                         {/* 2. CARD INFORMAÇÕES BÁSICAS */}
                         <div className="space-y-6">
                             <div className="p-8 bg-white rounded-2xl shadow-lg border border-[#f0e6ef] h-full">
-                                <h2 className="text-xl font-bold mb-6" style={{ color: BRAND.primaryDark }}>Informações Básicas</h2>
+                                <h2 className="text-lg font-bold mb-6" style={{ color: BRAND.primaryDark }}>Informações Básicas</h2>
 
                                 <div className="space-y-4">
                                     <DetailItem icon={MdInfo} label="Nome Completo" value={MOCK_USER.name} />
@@ -95,22 +97,22 @@ export default function PerfilPage() {
                         {/* 3. CARD SEGURANÇA E AÇÕES */}
                         <div className="space-y-6">
                             <div className="p-8 bg-white rounded-2xl shadow-lg border border-[#f0eef0] h-full">
-                                <h2 className="text-xl font-bold mb-6" style={{ color: BRAND.primaryDark }}>Segurança e Ações</h2>
+                                <h2 className="text-lg font-bold mb-6" style={{ color: BRAND.primaryDark }}>Segurança e Ações</h2>
 
                                 <div className="space-y-4">
                                     <Link href="/perfil/editar" className="flex items-center gap-4 p-3 bg-[#e8def8] rounded-lg hover:bg-[#dfd4e6] transition-colors font-medium text-gray-800">
-                                        <MdLock size={24} className="text-purple-700" />
-                                        <span>Alterar Senha</span>
+                                        <div className="flex-shrink-0"><MdLock size={24} className="text-purple-700" /></div>
+                                        <span className="min-w-0 break-words">Alterar Senha</span>
                                     </Link>
 
                                     <Link href="/perfil/editar" className="flex items-center gap-4 p-3 bg-[#e8def8] rounded-lg hover:bg-[#dfd4e6] transition-colors font-medium text-gray-800">
-                                        <MdEdit size={24} className="text-purple-700" />
-                                        <span>Editar Perfil</span>
+                                        <div className="flex-shrink-0"><MdEdit size={24} className="text-purple-700" /></div>
+                                        <span className="min-w-0 break-words">Editar Perfil</span>
                                     </Link>
 
                                     <button className="w-full text-left flex items-center gap-4 p-3 bg-[#ffe8e8] rounded-lg hover:bg-[#ffdfdf] transition-colors font-medium text-red-600">
-                                        <MdDelete size={24} className="text-red-600" />
-                                        <span>Excluir Conta Permanentemente</span>
+                                        <div className="flex-shrink-0"><MdDelete size={24} className="text-red-600" /></div>
+                                        <span className="min-w-0 break-words">Excluir Conta Permanentemente</span>
                                     </button>
                                 </div>
                             </div>

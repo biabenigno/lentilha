@@ -174,12 +174,12 @@ export default function Page() {
             <div className="flex items-start justify-between gap-4 mb-4">
               <div>
                 <h1
-                  className="text-4xl font-extrabold"
+                  className="text-2xl font-extrabold"
                   style={{ color: BRAND.primary }}
                 >
                   Resumo
                 </h1>
-                <p className="mt-2 text-sm" style={{ color: BRAND.mutedText }}>
+                <p className="mt-2 text-xs" style={{ color: BRAND.mutedText }}>
                   Um resumo condensado do seu consumo — ajustado para:{" "}
                   <strong>{period}</strong>
                 </p>
@@ -214,7 +214,7 @@ export default function Page() {
               {/* Totais */}
               <div className="rounded-xl bg-[#f8fff6] p-6 shadow-sm lg:col-span-1">
                 <h2
-                  className="text-xl font-semibold mb-3"
+                  className="text-base font-semibold mb-3"
                   style={{ color: BRAND.primary }}
                 >
                   Resumo rápido
@@ -222,22 +222,22 @@ export default function Page() {
 
                 <div className="space-y-3 text-[#4b6a54]">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm">Total de carbono emitido:</span>
-                    <strong className="text-lg">
+                    <span className="text-xs">Total de carbono emitido:</span>
+                    <strong className="text-base">
                       {fmtKg(scaled.totals.co2e)}
                     </strong>
                   </div>
 
                   <div className="flex items-center justify-between">
-                    <span className="text-sm">Total de água usada:</span>
-                    <strong className="text-lg">
+                    <span className="text-xs">Total de água usada:</span>
+                    <strong className="text-base">
                       {fmtLit(scaled.totals.water)}
                     </strong>
                   </div>
 
                   <div className="flex items-center justify-between">
-                    <span className="text-sm">Total de terra usada:</span>
-                    <strong className="text-lg">
+                    <span className="text-xs">Total de terra usada:</span>
+                    <strong className="text-base">
                       {fmtM2(scaled.totals.land)}
                     </strong>
                   </div>
@@ -271,12 +271,12 @@ export default function Page() {
               <div className="rounded-xl bg-[#f6fff9] p-6 shadow-sm lg:col-span-3 flex flex-col">
                 <div className="flex items-center justify-between mb-3">
                   <h3
-                    className="text-xl font-semibold"
+                    className="text-base font-semibold"
                     style={{ color: BRAND.primary }}
                   >
                     Visualizações
                   </h3>
-                  <div className="text-sm text-[#6b6b6b]">
+                  <div className="text-xs text-[#6b6b6b]">
                     Período: <strong>{period}</strong>
                   </div>
                 </div>
@@ -286,7 +286,7 @@ export default function Page() {
                   <div className="p-3 bg-white rounded-md shadow-sm flex flex-col">
                     <div className="flex items-center justify-between mb-2">
                       <strong
-                        className="text-sm"
+                        className="text-xs"
                         style={{ color: BRAND.primary }}
                       >
                         CO₂e por categoria
@@ -328,7 +328,7 @@ export default function Page() {
                       </ResponsiveContainer>
                     </div>
 
-                    <div className="mt-3 text-sm text-[#4b6a54] min-h-[32px]">
+                    <div className="mt-3 text-xs text-[#4b6a54] min-h-[32px]">
                       {selectedCO2 ? (
                         <span>
                           Selecionado: <strong>{selectedCO2.series}</strong> —{" "}
@@ -349,7 +349,7 @@ export default function Page() {
                   <div className="p-3 bg-white rounded-md shadow-sm flex flex-col">
                     <div className="flex items-center justify-between mb-2">
                       <strong
-                        className="text-sm"
+                        className="text-xs"
                         style={{ color: BRAND.primary }}
                       >
                         Consumo de água (amostra)
@@ -411,7 +411,7 @@ export default function Page() {
                       </ResponsiveContainer>
                     </div>
 
-                    <div className="mt-3 text-sm text-[#4b6a54] min-h-[32px]">
+                    <div className="mt-3 text-xs text-[#4b6a54] min-h-[32px]">
                       {selectedWater ? (
                         <span>
                           {selectedWater.day}:{" "}
@@ -434,7 +434,7 @@ export default function Page() {
                   <div className="p-3 bg-white rounded-md shadow-sm flex flex-col">
                     <div className="flex items-center justify-between mb-2">
                       <strong
-                        className="text-sm"
+                        className="text-xs"
                         style={{ color: BRAND.primary }}
                       >
                         Uso de terra por refeição
@@ -477,7 +477,7 @@ export default function Page() {
                       </ResponsiveContainer>
                     </div>
 
-                    <div className="mt-3 text-sm text-[#4b6a54] min-h-[32px]">
+                    <div className="mt-3 text-xs text-[#4b6a54] min-h-[32px]">
                       {selectedLand ? (
                         <span>
                           {selectedLand.meal}:{" "}
@@ -497,7 +497,7 @@ export default function Page() {
             {/* Substituições */}
             <section className="rounded-xl bg-[#fffafc] p-6 mt-6">
               <h2
-                className="text-2xl font-bold mb-4"
+                className="text-lg font-bold mb-4"
                 style={{ color: BRAND.primary }}
               >
                 Possíveis substituições

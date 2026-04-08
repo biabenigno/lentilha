@@ -72,3 +72,18 @@ export async function clearUserMeals(userId = 1) {
     return null;
   }
 }
+
+export async function deleteUserMeal(mealId) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/meals/${mealId}`, {
+      method: 'DELETE'
+    });
+    if (!response.ok) {
+      throw new Error(`Failed to delete meal ${mealId}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('API Error (deleteUserMeal):', error);
+    return null;
+  }
+}

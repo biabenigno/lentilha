@@ -67,7 +67,7 @@ const SearchResultItem = ({ nome, descricao, imagem, id, onAdd }) => {
           hover:shadow-md
           hover:border-[#B4CF66]
           transition-all
-          h-[110px]
+          min-h-[110px]
           w-full
         "
       >
@@ -99,13 +99,13 @@ const SearchResultItem = ({ nome, descricao, imagem, id, onAdd }) => {
             )}
           </div>
 
-          <div className="flex flex-col flex-1 min-w-0 justify-center text-left">
-            <span className="text-[#146151] font-extrabold text-lg leading-tight truncate">{nome}</span>
-            <div className="mt-1 flex items-center gap-1.5 overflow-hidden">
-               <span className={`shrink-0 text-[9px] font-black ${prepColor} text-white px-2 py-0.5 rounded-md uppercase tracking-wider shadow-sm`}>
-                 {prepLabel}
-               </span>
-               <span className="text-[#6b6b6b] text-xs truncate font-medium opacity-60 italic">{descricao}</span>
+          <div className="flex flex-col flex-1 min-w-0 justify-center text-left py-1">
+            <span className="text-[#146151] font-extrabold text-sm md:text-base leading-tight mb-1">{nome}</span>
+            <div className="mt-1 flex flex-wrap items-center gap-1.5 overflow-hidden">
+              <span className={`shrink-0 text-[8px] md:text-[9px] font-black ${prepColor} text-white px-2 py-0.5 rounded-md uppercase tracking-wider shadow-sm`}>
+                {prepLabel}
+              </span>
+              <span className="text-[#6b6b6b] text-xs font-medium opacity-60 italic">{descricao}</span>
             </div>
           </div>
         </div>
@@ -116,7 +116,7 @@ const SearchResultItem = ({ nome, descricao, imagem, id, onAdd }) => {
             rounded-full 
             flex items-center justify-center 
             text-[#448040] bg-[#f0f9f3]
-            text-2xl font-medium 
+            text-lg font-medium 
             group-hover:bg-[#448040] group-hover:text-white 
             transition-colors ml-4 shadow-sm shrink-0 z-10
           "
@@ -137,7 +137,7 @@ export default function PesquisaPage() {
   const [hasSearched, setHasSearched] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [toast, setToast] = useState({ show: false, message: '' });
-  
+
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -162,16 +162,16 @@ export default function PesquisaPage() {
   const handleSearch = async (overrideTerm = null, page = 1) => {
     const termToUse = typeof overrideTerm === 'string' ? overrideTerm : searchTerm;
     const term = termToUse.trim();
-    
+
     if (typeof overrideTerm === 'string') {
       setSearchTerm(overrideTerm);
       setIsTyping(false);
     } else {
       setIsTyping(false);
     }
-    
+
     setShowSuggestions(false);
-    
+
     if (!term) {
       setSearchResults([]);
       setHasSearched(false);
@@ -186,7 +186,7 @@ export default function PesquisaPage() {
       setSearchResults(mappedResults);
       setTotalPages(data.total_pages || 1);
       setHasSearched(true);
-      
+
       // Scroll to top of results
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error) {
@@ -204,7 +204,7 @@ export default function PesquisaPage() {
         try {
           const data = await searchFoods(term, 1, 15); // More suggestions to filter from
           const mappedResults = (data.items || []).map(item => mapBackendFoodToUI(item));
-          
+
           // Filter to ensure unique names in suggestions
           const uniqueNames = new Set();
           const filtered = [];
@@ -214,7 +214,7 @@ export default function PesquisaPage() {
               uniqueNames.add(item.nome);
             }
           }
-          
+
           setSuggestions(filtered.slice(0, 8)); // Show top 8 unique
           if (filtered.length > 0 && isTyping) {
             setShowSuggestions(true);
@@ -238,7 +238,7 @@ export default function PesquisaPage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-full w-full pt-20 relative">
+    <div className="flex flex-col items-center w-full pt-6 md:pt-16 px-4 md:px-8 bg-white relative">
 
       {/* --- TOAST NOTIFICATION --- */}
       <AnimatePresence>
@@ -262,7 +262,7 @@ export default function PesquisaPage() {
       {/* --- LOGO --- */}
       <Link
         href="/"
-        className="relative w-[550px] h-[128px] cursor-pointer mb-8"
+        className="relative w-full max-w-[280px] md:max-w-[550px] h-[80px] md:h-[128px] cursor-pointer mb-8 mt-12"
       >
         <Image
           src="/logo-lentilha.png"
@@ -327,8 +327,8 @@ export default function PesquisaPage() {
                 className="absolute top-[110%] left-0 w-full bg-white border border-gray-100 shadow-xl rounded-2xl overflow-hidden z-50 flex flex-col max-h-[300px] overflow-y-auto"
               >
                 {suggestions.map((item) => (
-                  <div 
-                    key={item.id} 
+                  <div
+                    key={item.id}
                     onClick={() => handleSearch(item.nome)}
                     className="flex items-center px-6 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-50 last:border-0 transition-colors"
                   >
@@ -345,14 +345,14 @@ export default function PesquisaPage() {
       {/* --- RESULTADOS DA PESQUISA --- */}
       <div className="w-full max-w-5xl px-4 mt-8">
         {isLoading && (
-          <p className="text-center text-[#448040] text-lg mt-10">
+          <p className="text-center text-[#448040] text-sm md:text-base mt-10">
             Buscando alimentos...
           </p>
         )}
       </div>
 
       {/* --- SEARCH RESULTS --- */}
-      <div className="w-full max-w-5xl px-6 pb-20">
+      <div className="w-full max-w-5xl px-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {searchResults.map((item) => (
             <SearchResultItem
@@ -368,7 +368,7 @@ export default function PesquisaPage() {
 
         {/* PAGINATION CONTROLS */}
         {hasSearched && totalPages > 1 && (
-          <div className="flex items-center justify-center gap-4 mt-12 pb-10">
+          <div className="flex flex-wrap items-center justify-center gap-4 mt-12 pb-6 px-2">
             <button
               onClick={() => handleSearch(searchTerm, currentPage - 1)}
               disabled={currentPage === 1 || isLoading}
@@ -376,7 +376,7 @@ export default function PesquisaPage() {
             >
               Anterior
             </button>
-            <span className="text-gray-500 font-medium tracking-widest text-sm">
+            <span className="text-gray-500 font-medium tracking-widest text-xs">
               PAGINA <span className="text-[#448040] font-black">{currentPage}</span> DE {totalPages}
             </span>
             <button
@@ -391,13 +391,13 @@ export default function PesquisaPage() {
 
         {hasSearched && searchResults.length === 0 && !isLoading && (
           <div className="text-center py-20">
-            <p className="text-gray-400 text-lg">Nenhum alimento encontrado para "{searchTerm}".</p>
+            <p className="text-gray-400 text-base">Nenhum alimento encontrado para "{searchTerm}".</p>
           </div>
         )}
       </div>
 
       {/* --- TEXTO DE RODAPÉ --- */}
-      <div className="text-sm text-gray-500 mt-4 mb-10">
+      <div className="text-xs text-gray-500 mt-2 text-center pb-4">
         <span>Não nos conhece ainda? </span>
         <Link href="/" className="text-[#448040] font-medium hover:underline">
           Clique aqui e entenda quem somos.

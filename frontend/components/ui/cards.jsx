@@ -56,20 +56,20 @@ const Cards = ({
                 />
               </div>
             )}
-            <p className="font-medium text-lg">{title}</p>
+            <p className="font-medium text-base">{title}</p>
           </div>
         </div>
       )}
 
       {/* Se o header for omitido, renderizamos o título aqui dentro */}
       {noHeader && title && (
-        <p className="font-medium text-xl text-gray-900">{title}</p>
+        <p className="font-medium text-lg text-gray-900">{title}</p>
       )}
 
 
       {/* VALOR PRINCIPAL E DESCRIÇÃO PRINCIPAL (Ficam fora do cabeçalho colorido) */}
       {mainValue && (
-        <p className="font-bold text-2xl text-purple-800">{mainValue}</p>
+        <p className="font-bold text-xl text-purple-800">{mainValue}</p>
       )}
       {mainDescription && (
         <p className="text-gray-700 text-base">{mainDescription}</p>

@@ -171,8 +171,8 @@ export default function AlimentoDetailPage({ params }) {
 
       {/* CONTEÚDO PRINCIPAL */}
       <div className="mt-18 bg-white lg:pl-[10%] lg:pr-[10%] px-4 py-8">
-        <div className="mb-12 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-          <div className="flex flex-col">
+        <div className="mb-12 flex flex-col gap-6 md:flex-row md:items-start md:justify-between w-full">
+          <div className="flex flex-col w-full md:w-[40%]">
             <div className="flex flex-col items-start md:flex-row md:items-center md:gap-8 gap-3">
               <h1 className="font-light text-4xl text-left">{alimento.title}</h1>
               <div className="flex gap-2">
@@ -184,8 +184,8 @@ export default function AlimentoDetailPage({ params }) {
             <p className="text-sm font-medium text-left mt-2 text-gray-600">{alimento.descricao}</p>
           </div>
 
-          <div className="flex flex-col md:flex-row items-center gap-3">
-            <div className={`h-10 px-4 flex items-center gap-2 rounded-full text-white font-medium text-sm ${impactStyles.colorClass}`}>
+          <div className="flex flex-col md:flex-row items-center md:justify-end gap-3 w-full md:w-[60%]">
+            <div className={`h-10 px-4 flex items-center gap-2 rounded-full text-white font-medium text-sm ${impactStyles.colorClass} flex-shrink-0 text-center whitespace-nowrap`}>
               <img src={alimento.impactIcon} className="w-6 h-6" alt="pegada" />
               {impactStyles.text}
             </div>

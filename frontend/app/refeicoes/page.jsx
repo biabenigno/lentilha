@@ -441,7 +441,7 @@ export default function Page() {
           <header className="flex items-center justify-between mb-6">
             <div>
               <h1
-                className="text-3xl font-extrabold"
+                className="text-xl md:text-2xl font-extrabold"
                 style={{ color: BRAND.primary }}
               >
                 Refeições
@@ -500,7 +500,7 @@ function MealSection({ meal }) {
           </motion.button>
 
           <div>
-            <h2 className="text-2xl font-bold" style={{ color: BRAND.primary }}>
+            <h2 className="text-lg font-bold" style={{ color: BRAND.primary }}>
               {meal.title}
             </h2>
             <div className="mt-1 text-sm text-[#4b6a54]">

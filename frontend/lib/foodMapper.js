@@ -75,28 +75,19 @@ const CATEGORY_THRESHOLDS = {
  * Updated based on database evidence (POF 2017-2018 scientific base).
  */
 const POF_GROUP_MAPPING = {
-  "63": "CEREAIS/LEGUM.",
-  "64": "HORTALIÇAS",
-  "65": "CEREAIS/LEGUM.",
-  "66": "CEREAIS/LEGUM.",
-  "67": "HORTALIÇAS",
-  "68": "FRUTAS",
-  "69": "AÇÚCARES",
-  "70": "SAIS/CONDIM.",
-  "71": "CARNES",
-  "72": "PESCADOS",
-  "74": "PESCADOS",
-  "76": "PESCADOS",
-  "77": "SAIS/CONDIM.",
-  "78": "CARNES",
-  "79": "LATICÍNIOS",
-  "80": "PANIFICADOS",
-  "81": "EMBUTIDOS",
-  "82": "BEBIDAS",
-  "83": "BEBIDAS",
-  "84": "ÓLEOS/GORD.",
-  "85": "PANIFICADOS",
-  "88": "HORTALIÇAS"
+  "63": "CEREAIS/LEGUM.",  // Cereais e Leguminosas
+  "64": "HORTALIÇAS",      // Hortaliças
+  "65": "FRUTAS",          // Frutas
+  "66": "AÇÚCARES",        // Açúcares e Doces
+  "67": "SAIS/CONDIM.",    // Sais e Condimentos
+  "68": "LATICÍNIOS",      // Laticínios
+  "69": "CARNES",          // Carnes
+  "70": "PESCADOS",        // Pescados
+  "71": "OVOS",            // Ovos
+  "72": "BEBIDAS",         // Bebidas
+  "74": "ÓLEOS/GORD.",     // Óleos e Gorduras
+  "81": "EMBUTIDOS",       // Embutidos
+  "84": "PANIFICADOS"      // Panificados
 };
 
 /**
@@ -120,12 +111,39 @@ function getCategory(pofCode) {
   return POF_GROUP_MAPPING[prefix] || "SAIS/CONDIM.";
 }
 
+const GLOBAL_THRESHOLDS = {
+  co2: [1039.0, 2830.6],
+  water: [993.2, 2578.7],
+  land: [6.8, 12.8]
+};
+
 const getLevel = (value, category, metric) => {
-  const config = CATEGORY_THRESHOLDS[category]?.[metric];
-  if (!config || value === null || value === undefined) return 'insuficiente';
-  if (value < config[0]) return 'baixa';
-  if (value < config[1]) return 'média';
-  return 'alta';
+  if (value === null || value === undefined) return 'insuficiente';
+
+  const catConfig = CATEGORY_THRESHOLDS[category]?.[metric];
+  const globConfig = GLOBAL_THRESHOLDS[metric];
+
+  const getTier = (val, thres) => {
+    if (!thres) return 'insuficiente';
+    if (val <= thres[0]) return 'baixa';
+    if (val <= thres[1]) return 'média';
+    return 'alta';
+  };
+
+  const catTier = getTier(value, catConfig);
+  const globTier = getTier(value, globConfig);
+
+  if (catTier === 'insuficiente' && globTier === 'insuficiente') return 'insuficiente';
+  if (catTier === 'insuficiente') return globTier;
+  if (globTier === 'insuficiente') return catTier;
+
+  // Usa a regra do mais severo (pior caso) entre o limite global e o limite da própria categoria
+  const severity = { 'baixa': 1, 'média': 2, 'alta': 3 };
+  const maxSeverity = Math.max(severity[catTier], severity[globTier]);
+  
+  if (maxSeverity === 3) return 'alta';
+  if (maxSeverity === 2) return 'média';
+  return 'baixa';
 };
 
 const METADATA = {
