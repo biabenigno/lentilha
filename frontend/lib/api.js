@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://lentilha.onrender.com';
 
 export async function searchFoods(query, page = 1, perPage = 10) {
   try {
