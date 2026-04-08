@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:9000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000';
 
 export async function searchFoods(query, page = 1, perPage = 10) {
   try {
@@ -6,7 +6,7 @@ export async function searchFoods(query, page = 1, perPage = 10) {
     if (!response.ok) throw new Error(`HTTP Error! status: ${response.status}`);
     return await response.json();
   } catch (error) {
-    console.error('ERRO DE REDE (PESQUISA): Verifique se o backend está rodando em http://localhost:9000', error);
+    console.error(`ERRO DE REDE (PESQUISA): Verifique se o backend está rodando em ${API_BASE_URL}`, error);
     return { items: [], total: 0 };
   }
 }

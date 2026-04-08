@@ -262,7 +262,7 @@ export default function PesquisaPage() {
       {/* --- LOGO --- */}
       <Link
         href="/"
-        className="relative w-full max-w-[280px] md:max-w-[550px] h-[80px] md:h-[128px] cursor-pointer mb-8 mt-12"
+        className="relative w-full max-w-[196px] md:max-w-[385px] h-[56px] md:h-[90px] cursor-pointer mb-8 mt-12"
       >
         <Image
           src="/logo-lentilha.png"
