@@ -38,6 +38,13 @@ def list_meals_by_user(
     return meal_service.get_meals_by_user(db, user_id, page=page, per_page=per_page)
 
 
+@router.delete("/user/{user_id}", status_code=200)
+def delete_all_user_meals(user_id: int, db: Session = Depends(get_db)):
+    """Delete all meals associated with a specific user."""
+    deleted_count = meal_service.delete_meals_by_user(db, user_id)
+    return {"message": f"Successfully deleted {deleted_count} meals.", "deleted_count": deleted_count}
+
+
 @router.delete("/{meal_id}", response_model=MealResponse)
 def delete_meal(meal_id: int, db: Session = Depends(get_db)):
     """Delete a meal by its ID."""

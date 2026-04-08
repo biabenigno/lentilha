@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { MdDirectionsCar, MdShower, MdLandscape } from "react-icons/md";
+import { MdDirectionsCar, MdShower, MdLandscape, MdDelete, MdFlight, MdWc, MdSportsTennis, MdSportsSoccer } from "react-icons/md";
 import {
   ResponsiveContainer,
   BarChart,
@@ -18,7 +18,7 @@ import {
   LineChart,
   Line,
 } from "recharts";
-import { getUserMeals } from "../../lib/api";
+import { getUserMeals, clearUserMeals } from "../../lib/api";
 import { mapBackendFoodToUI } from "../../lib/foodMapper";
 
 // Visual tokens
@@ -59,12 +59,21 @@ const getImpactStyles = (level) => {
         lightBgClass: "bg-[#fff0eb] border-[#ffcdc2]",
         icon: "/labels/pegada-alta.svg",
       };
+    case "dados insuficientes":
+    case "insuficiente":
+      return {
+        colorClass: "bg-gray-400 grayscale",
+        hexColor: "#9ca3af",
+        textClass: "text-gray-400",
+        lightBgClass: "bg-gray-50 border-gray-200",
+        icon: "/labels/pegada-baixa.svg", // Will be grayed out
+      };
     default:
       return {
-        colorClass: "bg-gray-500",
-        hexColor: "#6b7280",
-        textClass: "text-gray-500",
-        lightBgClass: "bg-gray-50 border-gray-200",
+        colorClass: "bg-gray-400",
+        hexColor: "#9ca3af",
+        textClass: "text-gray-400",
+        lightBgClass: "bg-gray-50 border-gray-100",
         icon: "/labels/pegada-media.svg",
       };
   }
@@ -147,7 +156,23 @@ function MetricCard({ icon, title, subtitle, bg = BRAND.primary }) {
   );
 }
 
-function ExpandableMealItem({ item }) {
+function EquivalenceCard({ icon, label, phrase, color }) {
+  return (
+    <div className="bg-white border border-gray-100 rounded-2xl p-5 flex items-start gap-5 shadow-sm hover:shadow-md transition-all border-l-4" style={{ borderLeftColor: color.replace('bg-', '') }}>
+      <div className={`w-14 h-14 rounded-xl flex items-center justify-center text-white shrink-0 shadow-lg ${color}`}>
+        {icon}
+      </div>
+      <div className="flex flex-col gap-1 justify-center min-h-[56px]">
+        <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">{label}</span>
+        <p className="text-[#146151] font-medium text-base leading-relaxed italic">
+          "{phrase}"
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function ExpandableMealItem({ item, testMode = "A" }) {
   const [open, setOpen] = useState(false);
   const impactStyles = getImpactStyles(item.impactLevel);
   
@@ -159,6 +184,56 @@ function ExpandableMealItem({ item }) {
   // Simple check for suggestions
   const suggestion = item.alternativa && item.alternativa.length > 0 ? item.alternativa[0] : null;
   const showSuggestion = suggestion && !isAllGreen;
+
+  // Equivalences Logic from Excel
+  // carbon is in grams in DB, formulas expect kg
+  const carbon = (item.rawCarbon || 0) / 1000; 
+  const water = item.rawWater || 0;
+  const land = item.rawLand || 0;
+
+  const formatPhrase = (val, standardPhrase) => {
+    return val <= 0.0001 ? "O impacto nessa área é mínimo!" : standardPhrase;
+  };
+
+  const equivalents = testMode === "A" ? [
+    { 
+      label: "Carbono", 
+      phrase: formatPhrase(carbon / 0.248, `Esse prato emitiu carbono equivalente a cerca de ${(carbon / 0.248).toFixed(1)} km de carro.`), 
+      icon: <MdDirectionsCar size={28}/>, 
+      color: "bg-orange-500" 
+    },
+    { 
+      label: "Água", 
+      phrase: formatPhrase(water / 9.46, `O consumo de água equivale a cerca de ${(water / 9.46).toFixed(1)} minutos de banho.`), 
+      icon: <MdShower size={28}/>, 
+      color: "bg-blue-500" 
+    },
+    { 
+      label: "Área", 
+      phrase: formatPhrase(land / 7140, `A área usada equivale a ${(land / 7140).toFixed(3)} campos de futebol.`), 
+      icon: <MdSportsSoccer size={28}/>, 
+      color: "bg-green-600" 
+    }
+  ] : [
+    { 
+      label: "Carbono", 
+      phrase: formatPhrase((carbon / 0.207) * 1.609, `Esse alimento gerou impacto parecido com um trecho curto de avião de quase ${((carbon / 0.207) * 1.609).toFixed(1)} km.`), 
+      icon: <MdFlight size={28}/>, 
+      color: "bg-sky-500" 
+    },
+    { 
+      label: "Água", 
+      phrase: formatPhrase(water / 4.85, `Esse item consumiu água equivalente a ${(water / 4.85).toFixed(1)} descargas de vaso.`), 
+      icon: <MdWc size={28}/>, 
+      color: "bg-indigo-500" 
+    },
+    { 
+      label: "Área", 
+      phrase: formatPhrase(land / 260.8, `Esse impacto ocupou área parecida com ${(land / 260.8).toFixed(1)} quadras de tênis.`), 
+      icon: <MdSportsTennis size={28}/>, 
+      color: "bg-lime-500" 
+    }
+  ];
 
   return (
     <div className={`rounded-xl border p-5 ${impactStyles.lightBgClass || "bg-[#f6fff9] border-gray-100"}`}>
@@ -172,18 +247,18 @@ function ExpandableMealItem({ item }) {
             )}
           </div>
 
-          <div className="flex flex-col gap-1">
-            <div className="flex items-center gap-3">
-              <div className="font-semibold text-[#2f6b46] text-lg">{item.nome}</div>
+          <div className="flex flex-col gap-1 min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="font-bold text-[#2f6b46] text-lg leading-tight">{item.nome}</div>
               <ImpactPill level={item.impactLevel} />
             </div>
-            <div className="text-sm text-[#6b6b6b]">Porção de 100g</div>
+            <div className="text-xs font-medium text-[#6b6b6b] opacity-70">Porção de 100g</div>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <span className="text-xs px-2 py-1 rounded-full border bg-[#fff6e6] border-[#F0E2B9] text-[#B4862B]">
-            Geral
+        <div className="flex items-center gap-3 shrink-0">
+          <span className="text-[10px] px-2 py-0.5 rounded-md font-bold uppercase tracking-tight border bg-[#448040]/10 border-[#448040]/20 text-[#448040]">
+            {item.categoria || "Geral"}
           </span>
 
           <button
@@ -204,53 +279,67 @@ function ExpandableMealItem({ item }) {
             transition={{ duration: 0.2, ease: "easeInOut" }}
             className="mt-4 text-sm text-[#4b6a54] bg-white p-5 rounded-md border border-gray-100 overflow-hidden shadow-inner"
           >
-            <div className="flex flex-col md:flex-row gap-6 mt-2">
-              <div className="flex-1 grid grid-cols-3 gap-3">
-                <MetricMiniCard 
-                  metric="CO₂" 
-                  total={item.co2Card.mainValue} 
-                  icon={item.co2Card.iconSrc} 
-                  level={item.co2Card.impactLevel} 
-                />
-                <MetricMiniCard 
-                  metric="Água" 
-                  total={item.aguaCard.mainValue} 
-                  icon={item.aguaCard.iconSrc} 
-                  level={item.aguaCard.impactLevel} 
-                />
-                <MetricMiniCard 
-                  metric="Terra" 
-                  total={item.terraCard.mainValue} 
-                  icon={item.terraCard.iconSrc} 
-                  level={item.terraCard.impactLevel} 
-                />
-              </div>
+            <div className="flex flex-col gap-6 mt-2">
+              {/* Top Section: Badges and Description 50/50 */}
+              <div className="flex flex-col md:flex-row gap-6 items-stretch">
+                <div className="flex-1 grid grid-cols-3 gap-3">
+                  <MetricMiniCard 
+                    metric="CO₂" 
+                    total={item.co2Card.mainValue} 
+                    icon={item.co2Card.iconSrc} 
+                    level={item.co2Card.impactLevel} 
+                  />
+                  <MetricMiniCard 
+                    metric="Água" 
+                    total={item.aguaCard.mainValue} 
+                    icon={item.aguaCard.iconSrc} 
+                    level={item.aguaCard.impactLevel} 
+                  />
+                  <MetricMiniCard 
+                    metric="Terra" 
+                    total={item.terraCard.mainValue} 
+                    icon={item.terraCard.iconSrc} 
+                    level={item.terraCard.impactLevel} 
+                  />
+                </div>
 
-              <div className="w-full md:w-[45%] flex flex-col gap-3">
-                <div className="bg-[#fcfaf8] border border-gray-100 rounded-xl p-4">
-                  <span className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">
-                    Descrição
+                <div className="flex-1 bg-[#fcfaf8] border border-gray-100 rounded-xl p-5 flex flex-col justify-center">
+                  <span className="text-[11px] font-bold text-gray-400 uppercase tracking-widest block mb-2">
+                    Descrição do Preparo
                   </span>
-                  <p className="text-sm font-medium text-[#4b6a54] mt-1 line-clamp-2 leading-relaxed">
+                  <p className="text-sm font-medium text-[#4b6a54] leading-relaxed italic">
                     {item.descricao}
                   </p>
                 </div>
-                
-                {showSuggestion && (
-                  <div className="bg-[#f0f9f3] border border-[#d2eadc] rounded-xl p-4 shadow-sm flex items-start gap-4">
-                    <div className="flex-1">
-                      <span className="text-[11px] font-bold text-[#448040] uppercase flex items-center gap-1.5 mb-1.5">
-                         Alternativa Recomendada
-                      </span>
-                      <strong className="text-sm text-[#146151] block leading-tight">
-                         {suggestion.title}
-                      </strong>
-                      <p className="text-[11.5px] text-[#2f6b46] mt-1.5 leading-relaxed opacity-90">
-                         {suggestion.description}
-                      </p>
-                    </div>
+              </div>
+
+              {/* Suggestions (if any) */}
+              {showSuggestion && (
+                <div className="w-full bg-[#f0f9f3] border border-[#d2eadc] rounded-xl p-4 shadow-sm flex items-start gap-4">
+                  <div className="flex-1">
+                    <span className="text-[11px] font-bold text-[#448040] uppercase flex items-center gap-1.5 mb-1.5">
+                       Alternativa Recomendada
+                    </span>
+                    <strong className="text-sm text-[#146151] block leading-tight">
+                       {suggestion.title}
+                    </strong>
+                    <p className="text-[11.5px] text-[#2f6b46] mt-1.5 leading-relaxed opacity-90">
+                       {suggestion.description}
+                    </p>
                   </div>
-                )}
+                </div>
+              )}
+
+              {/* Bottom Section: Equivalences 100% */}
+              <div className="w-full bg-[#f8f9fa] rounded-2xl p-6 border border-gray-50">
+                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-5 pl-1 text-center">
+                  Equivalências de Impacto Ambiental (Modo {testMode})
+                </span>
+                <div className="flex flex-col gap-4">
+                  {equivalents.map((eq, i) => (
+                    <EquivalenceCard key={i} {...eq} />
+                  ))}
+                </div>
               </div>
             </div>
           </motion.div>
@@ -264,8 +353,20 @@ export default function AlmocoPage() {
   const [items, setItems] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [testMode, setTestMode] = useState("A");
 
   useEffect(() => {
+    // Initial load of test mode
+    const saved = localStorage.getItem("lentilha-test-mode");
+    if (saved) setTestMode(saved);
+
+    // Listener for sidebar toggle changes
+    const handleModeChange = (e) => {
+      setTestMode(e.detail);
+    };
+
+    window.addEventListener('testModeChanged', handleModeChange);
+    
     async function loadMeals() {
       setIsLoading(true);
       try {
@@ -288,6 +389,8 @@ export default function AlmocoPage() {
       }
     }
     loadMeals();
+
+    return () => window.removeEventListener('testModeChanged', handleModeChange);
   }, []);
 
   // Calculate real-time totals
@@ -306,10 +409,30 @@ export default function AlmocoPage() {
     ? `${highestImpactItem.nome} gerou a maior pegada (${highestImpactItem.impactLevel})`
     : "Nenhum alimento adicionado";
 
+  const handleClear = async () => {
+    const success = await clearUserMeals(1); // Hardcoded user 1
+    if (success) {
+      setItems([]);
+    }
+  };
+
   if (isLoading) return <div className="flex items-center justify-center min-h-screen text-[#448040] font-bold text-xl bg-[#f4f8f4]">Conectando ao banco de dados...</div>;
 
   return (
     <div className="min-h-screen p-6 bg-[#f4f8f4] font-sans relative">
+      
+      {/* Botão Flutuante de Limpar */}
+      <button
+        onClick={handleClear}
+        className="fixed bottom-8 right-8 w-16 h-16 bg-[#FF5A34] text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-[90] group"
+        title="Limpar Refeição"
+      >
+        <MdDelete size={32} />
+        <span className="absolute right-20 bg-[#FF5A34] text-white px-3 py-1.5 rounded-lg text-sm font-bold opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg">
+          Limpar Almoço
+        </span>
+      </button>
+
       <div className="w-full lg:pl-[120px] pr-6 lg:pr-10">
         <main className="flex flex-col lg:flex-row gap-8 items-start w-full">
           <div className="w-full lg:w-1/2 flex flex-col">
@@ -363,7 +486,7 @@ export default function AlmocoPage() {
                 </div>
               ) : (
                 items.map((it) => (
-                  <ExpandableMealItem key={it.mealId} item={it} />
+                  <ExpandableMealItem key={it.mealId} item={it} testMode={testMode} />
                 ))
               )}
             </div>
@@ -404,27 +527,52 @@ export default function AlmocoPage() {
                    </div>
                  </div>
 
-                 <div className="mt-8 space-y-5">
-                   <MetricCard
-                     icon={<MdDirectionsCar size={24} />}
-                     title={`${(totalCO2 * 5.5).toFixed(1)} km`}
-                     subtitle="Equivalente de carro"
-                     bg={BRAND.orange}
-                   />
-                   <MetricCard
-                     icon={<MdShower size={24} />}
-                     title={`${(totalWater / 15).toFixed(1)}h`}
-                     subtitle="Horas de chuveiro"
-                     bg={BRAND.primary}
-                   />
-                   <MetricCard
-                     icon={<MdLandscape size={24} />}
-                     title={`${(totalLand / 50).toFixed(1)} apt.`}
-                     subtitle="Área de apartamento"
-                     bg={BRAND.accent}
-                   />
-                 </div>
-               </div>
+                 <div className="flex flex-wrap gap-4 mt-6">
+            {testMode === "A" ? (
+              <>
+                <MetricCard
+                  icon={<MdDirectionsCar size={24} />}
+                  title={`${(totalCO2 / 0.248).toFixed(1)} km`}
+                  subtitle="Equivalente de carro"
+                  bg={BRAND.orange}
+                />
+                <MetricCard
+                  icon={<MdShower size={24} />}
+                  title={`${(totalWater / 9.46).toFixed(0)} min`}
+                  subtitle="Banho equivalente"
+                  bg="#4A90E2"
+                />
+                <MetricCard
+                  icon={<MdLandscape size={24} />}
+                  title={`${(totalLand / 7140).toFixed(4)}`}
+                  subtitle="Campos de futebol"
+                  bg={BRAND.primary}
+                />
+              </>
+            ) : (
+              <>
+                <MetricCard
+                  icon={<MdFlight size={24} />}
+                  title={`${((totalCO2 / 0.207) * 1.609).toFixed(1)} km`}
+                  subtitle="Distância de voo"
+                  bg="#00bcd4"
+                />
+                <MetricCard
+                  icon={<MdWc size={24} />}
+                  title={`${(totalWater / 4.85).toFixed(0)} fluxos`}
+                  subtitle="Descargas equivalentes"
+                  bg="#673ab7"
+                />
+                <MetricCard
+                  icon={<MdSportsTennis size={24} />}
+                  title={`${(totalLand / 260.8).toFixed(1)}`}
+                  subtitle="Quadras de tênis"
+                  bg="#8bc34a"
+                />
+              </>
+            )}
+          </div>
+                </div>
 
                <div className="rounded-xl bg-[#f6fff9] p-6 shadow-sm xl:w-[65%] flex flex-col gap-6">
                  {/* Charts remain similar but could be tied to state if expanded further */}

@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://127.0.0.1:9000';
+const API_BASE_URL = 'http://localhost:9000';
 
 export async function searchFoods(query, page = 1, perPage = 10) {
   try {
@@ -53,5 +53,22 @@ export async function getUserMeals(userId = 1) {
   } catch (error) {
     console.error('API Error (getUserMeals):', error);
     return { items: [], total: 0 };
+  }
+}
+
+export async function clearUserMeals(userId = 1) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/meals/user/${userId}`, {
+      method: 'DELETE'
+    });
+    if (!response.ok) {
+      const errorMsg = await response.text();
+      console.error(`Falha ao limpar: Status ${response.status} - ${errorMsg}`);
+      throw new Error(`Failed to clear user meals (Status ${response.status})`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('ERRO CRÍTICO (clearUserMeals):', error);
+    return null;
   }
 }

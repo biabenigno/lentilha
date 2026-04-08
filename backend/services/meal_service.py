@@ -66,3 +66,10 @@ def delete_meal(db: Session, meal_id: int) -> Meal | None:
         db.commit()
 
     return db_meal
+
+
+def delete_meals_by_user(db: Session, user_id: int) -> int:
+    """Delete all meals associated with a specific user and return the count."""
+    deleted_count = db.query(Meal).filter(Meal.user_id == user_id).delete(synchronize_session=False)
+    db.commit()
+    return deleted_count

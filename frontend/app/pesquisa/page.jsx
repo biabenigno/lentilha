@@ -21,6 +21,37 @@ const SearchResultItem = ({ nome, descricao, imagem, id, onAdd }) => {
     onAdd(safeId, safeNome);
   };
 
+  // Extrai o método de preparo principal da descrição longa
+  const getPrepInfo = (text = "") => {
+    const t = text.toLowerCase();
+    const mapping = {
+      "cozida": { label: "COZIDA", color: "bg-blue-500" },
+      "cozido": { label: "COZIDO", color: "bg-blue-500" },
+      "ensopada": { label: "ENSOPADA", color: "bg-sky-600" },
+      "ensopado": { label: "ENSOPADO", color: "bg-sky-600" },
+      "assada": { label: "ASSADA", color: "bg-orange-500" },
+      "assado": { label: "ASSADO", color: "bg-orange-500" },
+      "grelhada": { label: "GRELHADA", color: "bg-amber-600" },
+      "grelhado": { label: "GRELHADO", color: "bg-amber-600" },
+      "frita": { label: "FRITA", color: "bg-red-500" },
+      "frito": { label: "FRITO", color: "bg-red-500" },
+      "empanada": { label: "EMPANADA", color: "bg-yellow-600" },
+      "empanado": { label: "EMPANADO", color: "bg-yellow-600" },
+      "refogada": { label: "REFOGADA", color: "bg-teal-500" },
+      "refogado": { label: "REFOGADO", color: "bg-teal-500" },
+      "crua": { label: "CRUA", color: "bg-green-500" },
+      "cru": { label: "CRU", color: "bg-green-500" },
+      "conserva": { label: "CONSERVA", color: "bg-purple-500" }
+    };
+
+    for (const [key, info] of Object.entries(mapping)) {
+      if (t.includes(key)) return info;
+    }
+    return { label: "TRADICIONAL", color: "bg-[#448040]" };
+  };
+
+  const { label: prepLabel, color: prepColor } = getPrepInfo(descricao);
+
   return (
     <div className="relative group">
       <div
@@ -69,8 +100,13 @@ const SearchResultItem = ({ nome, descricao, imagem, id, onAdd }) => {
           </div>
 
           <div className="flex flex-col flex-1 min-w-0 justify-center text-left">
-            <span className="text-[#146151] font-bold text-lg leading-tight mb-1 truncate">{nome}</span>
-            <span className="text-[#6b6b6b] text-sm line-clamp-2 leading-relaxed pr-2">{descricao}</span>
+            <span className="text-[#146151] font-extrabold text-lg leading-tight truncate">{nome}</span>
+            <div className="mt-1 flex items-center gap-1.5 overflow-hidden">
+               <span className={`shrink-0 text-[9px] font-black ${prepColor} text-white px-2 py-0.5 rounded-md uppercase tracking-wider shadow-sm`}>
+                 {prepLabel}
+               </span>
+               <span className="text-[#6b6b6b] text-xs truncate font-medium opacity-60 italic">{descricao}</span>
+            </div>
           </div>
         </div>
 
@@ -101,6 +137,11 @@ export default function PesquisaPage() {
   const [hasSearched, setHasSearched] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [toast, setToast] = useState({ show: false, message: '' });
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const PER_PAGE = 8;
 
   const showToast = (message) => {
     setToast({ show: true, message });
@@ -118,7 +159,7 @@ export default function PesquisaPage() {
     }
   };
 
-  const handleSearch = async (overrideTerm = null) => {
+  const handleSearch = async (overrideTerm = null, page = 1) => {
     const termToUse = typeof overrideTerm === 'string' ? overrideTerm : searchTerm;
     const term = termToUse.trim();
     
@@ -138,14 +179,19 @@ export default function PesquisaPage() {
     }
 
     setIsLoading(true);
+    setCurrentPage(page);
     try {
-      const data = await searchFoods(term);
-      // Mapeia os resultados do backend para o formato rico da UI
+      const data = await searchFoods(term, page, PER_PAGE);
       const mappedResults = (data.items || []).map(item => mapBackendFoodToUI(item));
       setSearchResults(mappedResults);
+      setTotalPages(data.total_pages || 1);
       setHasSearched(true);
+      
+      // Scroll to top of results
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error) {
       console.error("Erro ao pesquisar:", error);
+      setSearchResults([]);
     } finally {
       setIsLoading(false);
     }
@@ -156,10 +202,21 @@ export default function PesquisaPage() {
       const term = searchTerm.trim();
       if (term) {
         try {
-          const data = await searchFoods(term);
+          const data = await searchFoods(term, 1, 15); // More suggestions to filter from
           const mappedResults = (data.items || []).map(item => mapBackendFoodToUI(item));
-          setSuggestions(mappedResults);
-          if (mappedResults.length > 0 && isTyping) {
+          
+          // Filter to ensure unique names in suggestions
+          const uniqueNames = new Set();
+          const filtered = [];
+          for (const item of mappedResults) {
+            if (!uniqueNames.has(item.nome)) {
+              filtered.push(item);
+              uniqueNames.add(item.nome);
+            }
+          }
+          
+          setSuggestions(filtered.slice(0, 8)); // Show top 8 unique
+          if (filtered.length > 0 && isTyping) {
             setShowSuggestions(true);
           }
         } catch (error) {
@@ -292,26 +349,49 @@ export default function PesquisaPage() {
             Buscando alimentos...
           </p>
         )}
+      </div>
 
-        {hasSearched && !isLoading && searchResults.length === 0 && (
-          <p className="text-center text-gray-500 text-lg mt-10">
-            Nenhum resultado encontrado para "{searchTerm}".
-          </p>
+      {/* --- SEARCH RESULTS --- */}
+      <div className="w-full max-w-5xl px-6 pb-20">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {searchResults.map((item) => (
+            <SearchResultItem
+              key={item.id}
+              id={item.id}
+              nome={item.nome}
+              descricao={item.descricao}
+              imagem={item.imagem}
+              onAdd={handleAddFood}
+            />
+          ))}
+        </div>
+
+        {/* PAGINATION CONTROLS */}
+        {hasSearched && totalPages > 1 && (
+          <div className="flex items-center justify-center gap-4 mt-12 pb-10">
+            <button
+              onClick={() => handleSearch(searchTerm, currentPage - 1)}
+              disabled={currentPage === 1 || isLoading}
+              className="px-6 py-2 rounded-full border border-gray-200 text-[#448040] font-bold hover:bg-[#f0f9f3] disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
+            >
+              Anterior
+            </button>
+            <span className="text-gray-500 font-medium tracking-widest text-sm">
+              PAGINA <span className="text-[#448040] font-black">{currentPage}</span> DE {totalPages}
+            </span>
+            <button
+              onClick={() => handleSearch(searchTerm, currentPage + 1)}
+              disabled={currentPage === totalPages || isLoading}
+              className="px-6 py-2 rounded-full bg-[#448040] text-white font-bold hover:bg-[#326030] disabled:opacity-30 disabled:hover:bg-[#448040] transition-colors shadow-md"
+            >
+              Próximo
+            </button>
+          </div>
         )}
 
-        {/* O GRID QUE CONTÉM OS ITENS */}
-        {!isLoading && searchResults.length > 0 && (
-          <div className="grid grid-cols-2 gap-4 mb-10">
-            {searchResults.map((item) => (
-              <SearchResultItem
-                key={item.id}
-                id={item.id}
-                nome={item.nome}
-                descricao={item.descricao}
-                imagem={item.imagem}
-                onAdd={handleAddFood}
-              />
-            ))}
+        {hasSearched && searchResults.length === 0 && !isLoading && (
+          <div className="text-center py-20">
+            <p className="text-gray-400 text-lg">Nenhum alimento encontrado para "{searchTerm}".</p>
           </div>
         )}
       </div>
