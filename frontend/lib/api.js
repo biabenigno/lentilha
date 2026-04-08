@@ -3,10 +3,10 @@ const API_BASE_URL = 'http://127.0.0.1:9000';
 export async function searchFoods(query, page = 1, perPage = 10) {
   try {
     const response = await fetch(`${API_BASE_URL}/foods/search?query=${encodeURIComponent(query)}&page=${page}&per_page=${perPage}`);
-    if (!response.ok) throw new Error('Failed to fetch foods');
-    return await response.ok ? await response.json() : { items: [], total: 0 };
+    if (!response.ok) throw new Error(`HTTP Error! status: ${response.status}`);
+    return await response.json();
   } catch (error) {
-    console.error('API Error (searchFoods):', error);
+    console.error('ERRO DE REDE (PESQUISA): Verifique se o backend está rodando em http://localhost:9000', error);
     return { items: [], total: 0 };
   }
 }
@@ -28,16 +28,19 @@ export async function addFoodToMeal(foodId, name, userId = 1) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        user_id: userId,
-        food_id: foodId,
-        name: name,
+        user_id: Number(userId),
+        food_id: Number(foodId),
+        name: String(name),
         description: 'Adicionado via pesquisa'
       })
     });
-    if (!response.ok) throw new Error('Failed to add food to meal');
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(`Erro ${response.status}: ${JSON.stringify(errorData)}`);
+    }
     return await response.json();
   } catch (error) {
-    console.error('API Error (addFoodToMeal):', error);
+    console.error('ERRO DE REDE (ADICIONAR MEAL): O backend respondeu?', error);
     return null;
   }
 }

@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { MdSearch } from "react-icons/md";
+import { motion, AnimatePresence } from 'framer-motion';
 import { searchFoods, addFoodToMeal } from '../../lib/api';
 import { mapBackendFoodToUI } from '../../lib/foodMapper';
 
@@ -14,18 +15,16 @@ const removeAccents = (str) => {
 const SearchResultItem = ({ nome, descricao, imagem, id, onAdd }) => {
   const safeNome = nome || 'item-indefinido';
   const safeId = id || '0';
-  const safeHref = `/alimentos/${safeId}`;
 
   const handleAddClick = (e) => {
     e.preventDefault();
-    e.stopPropagation();
     onAdd(safeId, safeNome);
   };
 
   return (
     <div className="relative group">
-      <Link
-        href={safeHref}
+      <div
+        onClick={handleAddClick}
         className="
           flex items-center justify-between 
           p-4 mx-2
@@ -37,12 +36,11 @@ const SearchResultItem = ({ nome, descricao, imagem, id, onAdd }) => {
           hover:shadow-md
           hover:border-[#B4CF66]
           transition-all
-          focus-within:border-[#448040]
           h-[110px]
           w-full
         "
       >
-        <div className="flex items-center h-full gap-4">
+        <div className="flex items-center h-full gap-4 overflow-hidden">
           <div
             className="
               relative 
@@ -71,27 +69,25 @@ const SearchResultItem = ({ nome, descricao, imagem, id, onAdd }) => {
           </div>
 
           <div className="flex flex-col flex-1 min-w-0 justify-center text-left">
-            <span className="text-[#146151] font-bold text-lg leading-tight mb-1">{nome}</span>
+            <span className="text-[#146151] font-bold text-lg leading-tight mb-1 truncate">{nome}</span>
             <span className="text-[#6b6b6b] text-sm line-clamp-2 leading-relaxed pr-2">{descricao}</span>
           </div>
         </div>
 
-        <button 
-          onClick={handleAddClick}
+        <div 
           className="
             w-10 h-10 
             rounded-full 
             flex items-center justify-center 
             text-[#448040] bg-[#f0f9f3]
             text-2xl font-medium 
-            hover:bg-[#448040] hover:text-white 
+            group-hover:bg-[#448040] group-hover:text-white 
             transition-colors ml-4 shadow-sm shrink-0 z-10
           "
-          title="Adicionar ao Almoço"
         >
           +
-        </button>
-      </Link>
+        </div>
+      </div>
     </div>
   );
 };

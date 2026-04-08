@@ -8,12 +8,14 @@ def ensure_user():
         user = db.query(User).filter(User.id == 1).first()
         if not user:
             print("Creating dummy user with ID 1...")
+            from datetime import date
             dummy_user = User(
                 id=1,
                 name="Fernanda",
                 email="fernanda@lentilha.com",
-                password_hash="dummy",
-                location="São Paulo, BR"
+                password="dummy",
+                location="São Paulo, BR",
+                birth_date=date(1995, 1, 1)
             )
             db.add(dummy_user)
             db.commit()
