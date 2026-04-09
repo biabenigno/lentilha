@@ -241,7 +241,7 @@ export default function Home() {
         </section>
 
         {/* --- BENTO GRID --- */}
-        <section className="w-full max-w-5xl mb-20">
+        <section className="w-full max-w-5xl mb-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Rigor Metodológico */}
             <div className="bg-[#146151] rounded-2xl p-8 text-left text-white flex flex-col justify-between overflow-hidden relative min-h-[260px]">
@@ -263,7 +263,7 @@ export default function Home() {
             <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm flex flex-col justify-between text-left min-h-[260px]">
               <div className="flex items-start justify-between">
                 <div className="space-y-3">
-                  <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-500">
+                  <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-[#448040]">
                     <MdPublic size={26} />
                   </div>
                   <h3 className="text-lg md:text-xl font-black text-[#146151]">Contexto Brasileiro</h3>
@@ -277,7 +277,7 @@ export default function Home() {
         </section>
 
         {/* --- TIMELINE --- */}
-        <section className="w-full max-w-5xl py-16 px-4 mb-16 text-center">
+        <section className="w-full max-w-5xl py-8 px-4 text-center">
           <div className="space-y-10">
             <div className="space-y-3">
               <h2 className="text-xl md:text-2xl font-black text-[#146151]">Como a ciência chega à sua mesa?</h2>
@@ -292,7 +292,7 @@ export default function Home() {
         </section>
 
         {/* --- STATS --- */}
-        <section className="w-full max-w-4xl py-12 px-4 mb-16">
+        <section className="w-full max-w-4xl py-12 px-4 mb-8">
           <div className="grid grid-cols-2 md:grid-cols-3 gap-8 text-center">
             <StatCounter value="2500" label="Alimentos" suffix="+" />
             <StatCounter value="100" label="Científico" suffix="%" />
