@@ -5,11 +5,17 @@ from controllers.meal_controller import router as meal_router
 from controllers.user_controller import router as user_router
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from database import BASE, engine
+from ensure_user import ensure_user
 from populate_db import populate_foods
 
 
 @asynccontextmanager
 async def lifespan(_app):
+    # Ensure tables exist
+    BASE.metadata.create_all(bind=engine)
+    # Ensure base data exists
+    ensure_user()
     populate_foods()
     yield
 

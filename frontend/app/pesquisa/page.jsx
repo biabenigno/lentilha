@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { MdSearch } from "react-icons/md";
+import { MdSearch, MdDelete } from "react-icons/md";
 import { motion, AnimatePresence } from 'framer-motion';
 import { searchFoods, addFoodToMeal } from '../../lib/api';
 import { mapBackendFoodToUI } from '../../lib/foodMapper';
@@ -12,7 +12,7 @@ const removeAccents = (str) => {
   return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 };
 
-const SearchResultItem = ({ nome, descricao, imagem, id, onAdd }) => {
+const SearchResultItem = ({ nome, descricao, imagem, id, onAdd, isAdded }) => {
   const safeNome = nome || 'item-indefinido';
   const safeId = id || '0';
 
@@ -111,17 +111,23 @@ const SearchResultItem = ({ nome, descricao, imagem, id, onAdd }) => {
         </div>
 
         <div
-          className="
+          className={`
             w-10 h-10 
             rounded-full 
             flex items-center justify-center 
-            text-[#448040] bg-[#f0f9f3]
             text-lg font-medium 
-            group-hover:bg-[#448040] group-hover:text-white 
-            transition-colors ml-4 shadow-sm shrink-0 z-10
-          "
+            transition-all ml-4 shadow-sm shrink-0 z-10
+            ${isAdded 
+              ? 'bg-[#448040] text-white' 
+              : 'text-[#448040] bg-[#f0f9f3] group-hover:bg-[#448040] group-hover:text-white'
+            }
+          `}
         >
-          +
+          {isAdded ? (
+            <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          ) : '+'}
         </div>
       </div>
     </div>
@@ -136,26 +142,28 @@ export default function PesquisaPage() {
   const [isTyping, setIsTyping] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [toast, setToast] = useState({ show: false, message: '' });
+  const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+  const [addedItems, setAddedItems] = useState(new Set());
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const PER_PAGE = 8;
 
-  const showToast = (message) => {
-    setToast({ show: true, message });
+  const showToast = (message, type = 'success') => {
+    setToast({ show: true, message, type });
     setTimeout(() => {
-      setToast({ show: false, message: '' });
+      setToast({ show: false, message, type });
     }, 3000);
   };
 
   const handleAddFood = async (id, name) => {
     const result = await addFoodToMeal(id, name);
     if (result) {
-      showToast(`${name} adicionado ao Almoço com sucesso!`);
+      setAddedItems(prev => new Set(prev).add(id));
+      showToast(`${name} adicionado ao Almoço com sucesso!`, 'success');
     } else {
-      showToast(`Erro ao adicionar ${name}.`);
+      showToast(`Erro ao adicionar ${name}.`, 'error');
     }
   };
 
@@ -247,12 +255,32 @@ export default function PesquisaPage() {
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] bg-[#146151] text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 border border-[#448040]/30"
+            className={`
+              fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] 
+              px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 border
+              text-white
+              ${toast.type === 'success' 
+                ? 'bg-[#146151] border-[#448040]/30' 
+                : 'bg-red-600 border-red-400'
+              }
+            `}
           >
-            <div className="w-6 h-6 rounded-full bg-[#B4CF66] flex items-center justify-center text-[#146151]">
-              <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
-              </svg>
+            <div className={`
+              w-6 h-6 rounded-full flex items-center justify-center
+              ${toast.type === 'success' 
+                ? 'bg-[#B4CF66] text-[#146151]' 
+                : 'bg-white text-red-600'
+              }
+            `}>
+              {toast.type === 'success' ? (
+                <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
+                </svg>
+              ) : (
+                <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              )}
             </div>
             <span className="font-medium">{toast.message}</span>
           </motion.div>
@@ -285,7 +313,11 @@ export default function PesquisaPage() {
               setIsTyping(true);
             }}
             onKeyDown={handleKeyDown}
-            onFocus={() => {
+            onFocus={(e) => {
+              // Move cursor to end
+              const val = e.currentTarget.value;
+              e.currentTarget.setSelectionRange(val.length, val.length);
+              
               if (suggestions.length > 0 && searchTerm.trim() !== '') {
                 setShowSuggestions(true);
               }
@@ -294,7 +326,7 @@ export default function PesquisaPage() {
             className="
               w-full 
               py-4 
-              pl-8 pr-16 
+              pl-8 pr-28
               text-gray-700 
               bg-white
               border border-gray-200
@@ -307,14 +339,33 @@ export default function PesquisaPage() {
             "
           />
 
-          <button
-            onClick={() => handleSearch()}
-            className={`absolute right-6 transition-colors ${isLoading ? 'text-gray-300' : 'text-gray-400 hover:text-[#448040]'}`}
-            disabled={isLoading}
-            aria-label="Pesquisar alimento"
-          >
-            <MdSearch size={28} className={isLoading ? "animate-pulse" : ""} />
-          </button>
+          {/* ICON BUTTONS CONTAINER */}
+          <div className="absolute right-4 flex items-center gap-2">
+            {/* CLEAR BUTTON (TRASH) */}
+            {searchTerm && (
+              <button
+                onClick={() => {
+                  setSearchTerm('');
+                  setSearchResults([]);
+                  setHasSearched(false);
+                }}
+                className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                aria-label="Limpar pesquisa"
+              >
+                <MdDelete size={22} />
+              </button>
+            )}
+
+            {/* SEARCH BUTTON */}
+            <button
+              onClick={() => handleSearch()}
+              className={`p-2 transition-colors ${isLoading ? 'text-gray-300' : 'text-gray-400 hover:text-[#448040]'}`}
+              disabled={isLoading}
+              aria-label="Pesquisar alimento"
+            >
+              <MdSearch size={28} className={isLoading ? "animate-pulse" : ""} />
+            </button>
+          </div>
 
           {/* AUTOCOMPLETE DROPDOWN */}
           <AnimatePresence>
@@ -362,6 +413,7 @@ export default function PesquisaPage() {
               descricao={item.descricao}
               imagem={item.imagem}
               onAdd={handleAddFood}
+              isAdded={addedItems.has(item.id)}
             />
           ))}
         </div>

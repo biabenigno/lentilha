@@ -7,13 +7,18 @@ from sqlalchemy.orm import Session
 router = APIRouter(prefix="/meals", tags=["meals"])
 
 
-@router.post("/", response_model=MealResponse, status_code=201)
+@router.post("", response_model=MealResponse, status_code=201)
 def create_meal(meal: MealCreate, db: Session = Depends(get_db)):
     """Register a new meal entry linking a user to a food item with quantity and date."""
-    return meal_service.create_meal(db, meal)
+    print(f"DEBUG: Attempting to add meal: {meal}")
+    try:
+        return meal_service.create_meal(db, meal)
+    except Exception as e:
+        print(f"ERROR: Failed to add meal: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/", response_model=MealListResponse)
+@router.get("", response_model=MealListResponse)
 def list_meals(page: int = 1, per_page: int = 10, db: Session = Depends(get_db)):
     """List all meals with paginated results."""
     return meal_service.get_meals(db, page=page, per_page=per_page)
@@ -45,7 +50,7 @@ def delete_all_user_meals(user_id: int, db: Session = Depends(get_db)):
     return {"message": f"Successfully deleted {deleted_count} meals.", "deleted_count": deleted_count}
 
 
-@router.delete("/{meal_id}", response_model=MealResponse)
+@router.delete("/{meal_id}", status_code=200)
 def delete_meal(meal_id: int, db: Session = Depends(get_db)):
     """Delete a meal by its ID."""
     meal = meal_service.delete_meal(db, meal_id)
@@ -53,4 +58,4 @@ def delete_meal(meal_id: int, db: Session = Depends(get_db)):
     if not meal:
         raise HTTPException(status_code=404, detail="Meal not found")
 
-    return meal
+    return {"message": "Meal deleted successfully", "id": meal_id}

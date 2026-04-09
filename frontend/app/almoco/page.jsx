@@ -18,7 +18,7 @@ import {
   LineChart,
   Line,
 } from "recharts";
-import { getUserMeals, clearUserMeals, getFoodDetail, deleteUserMeal } from "../../lib/api";
+import { getUserMeals, clearUserMeals, getFoodDetail, deleteUserMeal, getUserId } from "../../lib/api";
 import { mapBackendFoodToUI, mapBackendDetailToUI } from "../../lib/foodMapper";
 
 // Visual tokens
@@ -195,9 +195,9 @@ function ExpandableMealItem({ item, testMode = "A", onDelete }) {
   const impactStyles = getImpactStyles(item.impactLevel);
   
   const isAllGreen = 
-    item.co2Card.impactLevel === "baixa" && 
-    item.aguaCard.impactLevel === "baixa" && 
-    item.terraCard.impactLevel === "baixa";
+    item.co2Card?.impactLevel === "baixa" && 
+    item.aguaCard?.impactLevel === "baixa" && 
+    item.terraCard?.impactLevel === "baixa";
     
   // Simple check for suggestions
   const suggestion = item.alternativa && item.alternativa.length > 0 ? item.alternativa[0] : null;
@@ -309,21 +309,21 @@ function ExpandableMealItem({ item, testMode = "A", onDelete }) {
                 <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <MetricMiniCard 
                     metric="CO₂" 
-                    total={item.co2Card.mainValue} 
-                    icon={item.co2Card.iconSrc} 
-                    level={item.co2Card.impactLevel} 
+                    total={item.co2Card?.mainValue} 
+                    icon={item.co2Card?.iconSrc} 
+                    level={item.co2Card?.impactLevel} 
                   />
                   <MetricMiniCard 
                     metric="Água" 
-                    total={item.aguaCard.mainValue} 
-                    icon={item.aguaCard.iconSrc} 
-                    level={item.aguaCard.impactLevel} 
+                    total={item.aguaCard?.mainValue} 
+                    icon={item.aguaCard?.iconSrc} 
+                    level={item.aguaCard?.impactLevel} 
                   />
                   <MetricMiniCard 
                     metric="Terra" 
-                    total={item.terraCard.mainValue} 
-                    icon={item.terraCard.iconSrc} 
-                    level={item.terraCard.impactLevel} 
+                    total={item.terraCard?.mainValue} 
+                    icon={item.terraCard?.iconSrc} 
+                    level={item.terraCard?.impactLevel} 
                   />
                 </div>
 
@@ -384,26 +384,22 @@ export default function AlmocoPage() {
     const saved = localStorage.getItem("lentilha-test-mode");
     if (saved) setTestMode(saved);
 
-    // Listener for sidebar toggle changes
-    const handleModeChange = (e) => {
-      setTestMode(e.detail);
-    };
-
-    window.addEventListener('testModeChanged', handleModeChange);
-    
-    async function loadMeals() {
+    const loadMeals = async () => {
       setIsLoading(true);
       try {
-        const data = await getUserMeals(1); // Hardcoded user 1
-        const mapped = (data.items || []).map(meal => {
-          // Wrap backend food with our UI mapper
-          const mappedFood = mapBackendFoodToUI(meal.food);
-          return {
-            ...mappedFood,
-            mealId: meal.id,
-            addedAt: meal.created_at
-          };
-        });
+        const currentUserId = getUserId();
+        const data = await getUserMeals(currentUserId);
+        const mapped = (data.items || [])
+          .map(meal => {
+            const mappedFood = mapBackendFoodToUI(meal.food);
+            if (!mappedFood) return null;
+            return {
+              ...mappedFood,
+              mealId: meal.id,
+              addedAt: meal.created_at
+            };
+          })
+          .filter(Boolean);
         setItems(mapped);
       } catch (err) {
         console.error("Error loading meals:", err);
@@ -411,16 +407,24 @@ export default function AlmocoPage() {
       } finally {
         setIsLoading(false);
       }
-    }
+    };
+
     loadMeals();
 
+    // Listener for sidebar toggle changes
+    const handleModeChange = (e) => {
+      setTestMode(e.detail);
+      loadMeals(); // Reload on change
+    };
+
+    window.addEventListener('testModeChanged', handleModeChange);
     return () => window.removeEventListener('testModeChanged', handleModeChange);
   }, []);
 
   // Calculate real-time totals
-  const totalCO2 = items.reduce((sum, it) => sum + (parseFloat(it.co2Card.mainValue.replace(/[^\d.]/g, '')) || 0), 0) / 1000; // in kg
-  const totalWater = items.reduce((sum, it) => sum + (parseFloat(it.aguaCard.mainValue.replace(/[^\d.]/g, '')) || 0), 0);
-  const totalLand = items.reduce((sum, it) => sum + (parseFloat(it.terraCard.mainValue.replace(/[^\d.]/g, '')) || 0), 0);
+  const totalCO2 = items.reduce((sum, it) => sum + (parseFloat(it.co2Card?.mainValue?.replace(/[^\d.]/g, '') || '0') || 0), 0) / 1000; // in kg
+  const totalWater = items.reduce((sum, it) => sum + (parseFloat(it.aguaCard?.mainValue?.replace(/[^\d.]/g, '') || '0') || 0), 0);
+  const totalLand = items.reduce((sum, it) => sum + (parseFloat(it.terraCard?.mainValue?.replace(/[^\d.]/g, '') || '0') || 0), 0);
 
   const [dynamicHighestImpact, setDynamicHighestImpact] = useState(null);
 
@@ -428,7 +432,7 @@ export default function AlmocoPage() {
     async function loadHighestImpact() {
       if (items.length > 0) {
         const hItem = items.reduce((max, item) => 
-          (parseFloat(item.co2Card.mainValue.replace(/[^\d.]/g, '')) || 0) > (parseFloat(max.co2Card.mainValue.replace(/[^\d.]/g, '')) || 0) ? item : max
+          (parseFloat(item.co2Card?.mainValue?.replace(/[^\d.]/g, '') || '0') || 0) > (parseFloat(max.co2Card?.mainValue?.replace(/[^\d.]/g, '') || '0') || 0) ? item : max
         , items[0]);
 
         // Copy so we don't mutate state directly before set
@@ -461,7 +465,7 @@ export default function AlmocoPage() {
     : "Nenhum alimento adicionado";
 
   const handleClear = async () => {
-    const success = await clearUserMeals(1); // Hardcoded user 1
+    const success = await clearUserMeals(getUserId());
     if (success) {
       setItems([]);
     }

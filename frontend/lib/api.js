@@ -1,4 +1,14 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://lentilha.onrender.com';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '/api';
+/**
+ * Resolves the default userId based on the current test mode stored in localStorage.
+ * Test A = User 1
+ * Test B = User 2
+ */
+export function getUserId() {
+  if (typeof window === 'undefined') return 1;
+  const mode = localStorage.getItem("lentilha-test-mode");
+  return mode === "B" ? 2 : 1;
+}
 
 export async function searchFoods(query, page = 1, perPage = 10) {
   try {
@@ -14,7 +24,12 @@ export async function searchFoods(query, page = 1, perPage = 10) {
 export async function getFoodDetail(id) {
   try {
     const response = await fetch(`${API_BASE_URL}/foods/${id}`);
-    if (!response.ok) throw new Error('Failed to fetch food detail');
+    if (!response.ok) {
+      if (response.status !== 404) {
+        console.error(`API Error (getFoodDetail): status ${response.status}`);
+      }
+      return null;
+    }
     return await response.json();
   } catch (error) {
     console.error('API Error (getFoodDetail):', error);
@@ -22,9 +37,9 @@ export async function getFoodDetail(id) {
   }
 }
 
-export async function addFoodToMeal(foodId, name, userId = 1) {
+export async function addFoodToMeal(foodId, name, userId = getUserId()) {
   try {
-    const response = await fetch(`${API_BASE_URL}/meals/`, {
+    const response = await fetch(`${API_BASE_URL}/meals`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -45,7 +60,7 @@ export async function addFoodToMeal(foodId, name, userId = 1) {
   }
 }
 
-export async function getUserMeals(userId = 1) {
+export async function getUserMeals(userId = getUserId()) {
   try {
     const response = await fetch(`${API_BASE_URL}/meals/user/${userId}`);
     if (!response.ok) throw new Error('Failed to fetch user meals');
@@ -56,7 +71,7 @@ export async function getUserMeals(userId = 1) {
   }
 }
 
-export async function clearUserMeals(userId = 1) {
+export async function clearUserMeals(userId = getUserId()) {
   try {
     const response = await fetch(`${API_BASE_URL}/meals/user/${userId}`, {
       method: 'DELETE'

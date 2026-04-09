@@ -1,6 +1,6 @@
 from models.meal import Meal
 from schemas.meal_schema import MealCreate, MealListResponse
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 
 def get_meals(db: Session, page: int = 1, per_page: int = 10) -> MealListResponse:
@@ -16,7 +16,7 @@ def get_meals(db: Session, page: int = 1, per_page: int = 10) -> MealListRespons
         )
 
     skip = (page - 1) * per_page
-    items = db.query(Meal).offset(skip).limit(per_page).all()
+    items = db.query(Meal).options(joinedload(Meal.food)).offset(skip).limit(per_page).all()
 
     return MealListResponse(
         page=page, total=total, total_pages=total_pages, per_page=per_page, items=items
@@ -41,7 +41,7 @@ def get_meals_by_user(db: Session, user_id: int, page: int = 1, per_page: int = 
         )
 
     skip = (page - 1) * per_page
-    items = query.offset(skip).limit(per_page).all()
+    items = query.options(joinedload(Meal.food)).offset(skip).limit(per_page).all()
 
     return MealListResponse(
         page=page, total=total, total_pages=total_pages, per_page=per_page, items=items
