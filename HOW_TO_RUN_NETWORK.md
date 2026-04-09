@@ -9,8 +9,8 @@ Este guia explica como configurar o projeto Lentilha para ser acessado por outro
    ```powershell
    ipconfig
    ```
-3. Procure por `Endereço IPv4` na seção "Adaptador Ethernet" ou "Adaptador Wi-Fi".
-   * Exemplo: `192.168.1.15` (Anote este número).
+3. Procure por `Endereço IPv4` na seção "Adaptador de Rede sem Fio Wi-Fi" ou "Adaptador Wi-Fi".
+   * Exemplo: `10.232.241.176` (Anote este número).
 
 ---
 
@@ -39,13 +39,11 @@ cd backend
 
 ## 4. Iniciar o Frontend (Next.js)
 
-Vá para a pasta raiz do projeto e rode o frontend com o parâmetro `-H 0.0.0.0` para que ele aceite conexões de outros IPs:
-
+Abra um **novo terminal**, vá para a pasta `frontend` e rode o projeto com o parâmetro `-H 0.0.0.0` para que ele aceite conexões de outros IPs:
 ```powershell
-cd .. # se estiver na pasta backend
+cd frontend
 npm run dev -- -H 0.0.0.0
 ```
-
 *O servidor estará escutando na porta **3000**.*
 
 ---
@@ -55,11 +53,12 @@ npm run dev -- -H 0.0.0.0
 1. Certifique-se de que o iPad está no **mesmo Wi-Fi** que o computador.
 2. Abra o navegador (Safari/Chrome) no iPad.
 3. Digite o endereço usando o IP que você anotou no passo 1:
+
    ```text
    http://SEU_IP_AQUI:3000
    ```
 
-   *Exemplo: `http://192.168.1.15:3000`*
+   *Exemplo: `http://10.232.241.176:3000`*
 
 ---
 
