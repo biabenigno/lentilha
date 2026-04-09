@@ -7,6 +7,8 @@ import Link from "next/link";
 import { MdEdit, MdDelete, MdEmail, MdLocationOn, MdCalendarToday, MdLock, MdInfo } from "react-icons/md";
 // ⬅️ NOVA IMPORTAÇÃO DO COMPONENTE DE BARRA LATERAL SECUNDÁRIA
 import SecondarySidebar from "../../components/secondarySidebar";
+import { getUserId } from "../../lib/api";
+import { useState, useEffect } from "react";
 
 // Visual tokens (Copiado de app/refeicoes/page.jsx)
 const BRAND = {
@@ -18,19 +20,27 @@ const BRAND = {
     mutedText: "#6b6b6b",
 };
 
-// Dados mockados do usuário
-const MOCK_USER = {
-    name: "Fernanda Souza",
-    email: "fernanda.souza@lentilha.com.br",
-    location: "São Paulo, SP",
-    memberSince: "Janeiro de 2024",
+// Dados dos usuários baseados no Teste A/B
+const USERS = {
+    1: {
+        name: "Fernanda Souza",
+        email: "fernanda.souza@lentilha.com.br",
+        location: "São Paulo, SP",
+        memberSince: "Janeiro de 2024",
+    },
+    2: {
+        name: "Ricardo Oliveira",
+        email: "ricardo.oliveira@lentilha.com.br",
+        location: "Fortaleza, CE",
+        memberSince: "Abril de 2025",
+    }
 };
 
 function DetailItem({ icon: Icon, label, value }) {
     return (
         <div className="flex items-center gap-4 p-3 bg-white rounded-lg shadow-sm">
             <div className="flex-shrink-0">
-                <Icon size={24} className="text-purple-600" />
+                <Icon size={24} className="text-[#448040]" />
             </div>
             <div className="min-w-0 flex-1">
                 <p className="text-xs text-gray-500 truncate">{label}</p>
@@ -41,6 +51,20 @@ function DetailItem({ icon: Icon, label, value }) {
 }
 
 export default function PerfilPage() {
+    const [currentUser, setCurrentUser] = useState(USERS[1]);
+
+    useEffect(() => {
+        // Inicializa o usuário correto
+        setCurrentUser(USERS[getUserId()]);
+
+        const handleModeChange = (e) => {
+            const mode = e.detail;
+            setCurrentUser(USERS[mode === "B" ? 2 : 1]);
+        };
+
+        window.addEventListener('testModeChanged', handleModeChange);
+        return () => window.removeEventListener('testModeChanged', handleModeChange);
+    }, []);
     return (
         <div className="min-h-screen p-6 bg-[#f3eef6] font-sans relative">
 
@@ -65,12 +89,12 @@ export default function PerfilPage() {
                             <div className="w-full p-6 bg-white rounded-2xl shadow-lg border border-[#f0e6ef] text-center">
                                 <Image
                                     src="/avatar.png"
-                                    alt={MOCK_USER.name}
+                                    alt={currentUser.name}
                                     width={150}
                                     height={150}
                                     className="object-cover rounded-full mx-auto mb-4 border-4 border-gray-100 shadow-md"
                                 />
-                                <p className="text-base font-bold">{MOCK_USER.name}</p>
+                                <p className="text-base font-bold">{currentUser.name}</p>
                                 <p className="text-sm text-gray-500">Usuário Lentilha</p>
 
                                 <Link href="/perfil/editar" className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-purple-600 hover:underline">
@@ -86,10 +110,10 @@ export default function PerfilPage() {
                                 <h2 className="text-lg font-bold mb-6" style={{ color: BRAND.primaryDark }}>Informações Básicas</h2>
 
                                 <div className="space-y-4">
-                                    <DetailItem icon={MdInfo} label="Nome Completo" value={MOCK_USER.name} />
-                                    <DetailItem icon={MdEmail} label="Email" value={MOCK_USER.email} />
-                                    <DetailItem icon={MdLocationOn} label="Localização" value={MOCK_USER.location} />
-                                    <DetailItem icon={MdCalendarToday} label="Membro Desde" value={MOCK_USER.memberSince} />
+                                    <DetailItem icon={MdInfo} label="Nome Completo" value={currentUser.name} />
+                                    <DetailItem icon={MdEmail} label="Email" value={currentUser.email} />
+                                    <DetailItem icon={MdLocationOn} label="Localização" value={currentUser.location} />
+                                    <DetailItem icon={MdCalendarToday} label="Membro Desde" value={currentUser.memberSince} />
                                 </div>
                             </div>
                         </div>
